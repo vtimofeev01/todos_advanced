@@ -314,6 +314,20 @@ class Todo(db.Model, BaseModel):
             return 'is_near'
         return ''
 
+    @property
+    def editable(self):
+        limit = datetime.utcnow() - NEAR_INTERVAL
+        if not self.is_finished or self.finished_at is None:
+            return True
+        if self.created_at >= limit:
+            return True
+        if self.goal_at is not None and self.goal_at >= limit:
+            return True
+        if self.finished_at is not None and self.finished_at >= limit:
+            return True
+        return False
+
+
     def finished(self):
         self.is_finished = True
         self.finished_at = datetime.utcnow()

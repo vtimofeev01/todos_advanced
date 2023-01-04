@@ -20,7 +20,7 @@
             {% for todo in tag_todos %}
                 <tr>
                     <td class="id">
-                        {% if current_user and current_user._username == todo.creator and not current_user.b_show_all %}
+                        {% if current_user and current_user._username == todo.creator and todo.editable %}
                             <a href="{{ url_for('main.todo_item',todolist_id=todolist_id, todo_id=todo.id) }}">{{ todo.id }}</a>
                         {% else %}
                             {{ todo.id }}
@@ -35,9 +35,10 @@
                     <td class="assigned">{% if todo.assigned %}{{ todo.assigned }}{% endif %}</td>
                     <td class="goal_at {{ todo.goal_state }}">{{ todo.f_goal }}</td>
                     <td class="finished_at">
-                        {% if todo.is_finished %}
+                        {% if todo.is_finished and todo.editable %}
                             <a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
                                 &cross; </a> {{ todo.f_finished }}
+                        {% elif todo.is_finished %} {{ todo.f_finished }}
                         {% else %}
                             <a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
                                 &check; </a>
