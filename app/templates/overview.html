@@ -4,14 +4,14 @@
 <script src="{{ url_for('static', filename='js/jquery.tablesorter.min.js') }}"></script>
 <script type="text/javascript" id="js">
 $(document).ready(function() {
-  var timeExtraction = function(node) {
-    if ($(node).attr('data-time-in-seconds') !== undefined) {
-      return '-' + node.getAttribute('data-time-in-seconds');
-    } else {
-      return node.innerHTML;
-    }
-  }
-  $("#todolist-overview-table").tablesorter({
+    let timeExtraction = function (node) {
+        if ($(node).attr('data-time-in-seconds') !== undefined) {
+            return '-' + node.getAttribute('data-time-in-seconds');
+        } else {
+            return node.innerHTML;
+        }
+    };
+    $("#todolist-overview-table").tablesorter({
     textExtraction: timeExtraction
   });
 });
@@ -42,7 +42,7 @@ $(document).ready(function() {
   </div>
   <div class="row">
     <div class="u-full-width">
-      <h6 class="docs-header todolist-overview">All your todolists</h6>
+      <h6 class="docs-header todolist-overview">All your todo lists</h6>
       <table id="todolist-overview-table" class="tablesorter">
         <thead>
           <tr>
@@ -55,7 +55,7 @@ $(document).ready(function() {
         <tbody>
           {% for todolist in current_user.todolists %}
             <tr>
-              <td><a href="{{ url_for('main.todolist', id=todolist.id) }}">{{ todolist.title }}</a></td>
+              <td><a href="{{ url_for('main.todolist', todolist_id=todolist.id) }}">{{ todolist.title }}</a></td>
               <td>{{ todolist.open_count }}</td>
               <td>{{ todolist.finished_count }}</td>
               <td data-time-in-seconds="{{ todolist.created_at|in_seconds }}">{{ todolist.created_at|humanize }}</td>

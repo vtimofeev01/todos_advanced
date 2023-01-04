@@ -78,7 +78,7 @@ class TodolistClientTestCase(TestCase):
     def test_register_and_login_and_logout(self):
         # register a new account
         response = self.register_user(self.username_alice)
-        # expect redirect to login
+        # expect redirect to log in
         self.assert_redirects(response, "/auth/login")
 
         # login with the new account

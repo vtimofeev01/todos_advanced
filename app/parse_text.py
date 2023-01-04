@@ -25,7 +25,7 @@ def msg_mark(s: str):
         s1 = s1.replace(tag, TAG_CLOSE)
     return s1
 
-def msg_demark(s:str):
+def msg_unmark(s:str):
     s1 = s.replace(TAG_OPEN, '[')
     s1 = s1.replace(TAG_CLOSE, ']')
     return s1

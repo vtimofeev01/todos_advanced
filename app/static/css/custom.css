@@ -26,7 +26,8 @@ td {
 }
 
 .container {
-  max-width: 1200px;
+  /*max-width: 1200px;*/
+  max-width: 1500px;
 }
 
 .header {
@@ -73,9 +74,11 @@ td {
 }
 
 
-span.marked {
-  color: rgba(82, 163, 219, 1);
+h6.marked {
+  color: rgb(0, 4, 72);
   font-weight: bold;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 }
 span.marked:hover {
   background-color: lightyellow;
@@ -272,7 +275,7 @@ input:checked + .slider:before {
     display: block;
   }
 
-  /* Re-overiding the width 100% declaration to match size of % based container */
+  /* Re-overriding the width 100% declaration to match size of % based container */
   .has-docked-nav .navbar > .container {
     width: 80%;
   }

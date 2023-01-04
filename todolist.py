@@ -24,7 +24,7 @@ def test():
 @app.cli.command()
 def fill_db():
     """Fills database with random data.
-    By default 10 users, 40 todolists and 160 todos.
+    By default, 10 users, 40 todolists and 160 todos.
     WARNING: will delete existing data. For testing purposes only.
     """
     from utils.fake_generator import FakeGenerator

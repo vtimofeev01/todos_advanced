@@ -7,7 +7,7 @@ from app import parse_text
 from app.main import main
 from app.main.forms import TodoForm, TodoListForm, TodoEditForm
 from app.models import Todo, TodoList, User
-from app.parse_text import msg_demark, msg_mark
+from app.parse_text import msg_unmark, msg_mark
 
 
 @main.route("/")
@@ -29,17 +29,17 @@ def _get_user():
     return current_user.username if current_user.is_authenticated else None
 
 
-@main.route("/todolist/<int:id>/", methods=["GET", "POST"])
+@main.route("/todolist/<int:todolist_id>/", methods=["GET", "POST"])
 @login_required
-def todolist(id):
-    todolist = TodoList.query.filter_by(id=id).first_or_404()
+def todolist(todolist_id):
+    l_todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
     # print(todolist.get_used_tags)
     form = TodoForm()
     if form.validate_on_submit():
-        Todo(form.todo.data, todolist.id, creator=_get_user(),
+        Todo(form.todo.data, l_todolist.id, creator=_get_user(),
              tags=form.tag.data, assigned_to=form.assigned.data).save()
-        return redirect(url_for("main.todolist", id=id))
-    return render_template("todolist.html", todolist=todolist, form=form)
+        return redirect(url_for("main.todolist", todolist_id=todolist_id))
+    return render_template("todolist.html", todolist=l_todolist, form=form)
 
 
 @main.route("/todolist/new/", methods=["POST"])
@@ -47,9 +47,9 @@ def todolist(id):
 def new_todolist():
     form = TodoForm(todo=request.form.get("todo"))
     if form.validate():
-        todolist = TodoList(creator=_get_user()).save()
-        Todo(form.todo.data, todolist.id).save()
-        return redirect(url_for("main.todolist", id=todolist.id))
+        l_todolist = TodoList(creator=_get_user()).save()
+        Todo(form.todo.data, l_todolist.id).save()
+        return redirect(url_for("main.todolist", todolist_id=l_todolist.id))
     return redirect(url_for("main.index"))
 
 
@@ -58,8 +58,8 @@ def new_todolist():
 def add_todolist():
     form = TodoListForm(todo=request.form.get("title"))
     if form.validate():
-        todolist = TodoList(form.title.data, _get_user()).save()
-        return redirect(url_for("main.todolist", id=todolist.id))
+        l_todolist = TodoList(form.title.data, _get_user()).save()
+        return redirect(url_for("main.todolist", todolist_id=l_todolist.id))
     return redirect(url_for("main.index"))
 
 
@@ -69,15 +69,23 @@ def set_view_filter(todolist_id):
     if current_user.is_authenticated:
         user = User.query.filter_by(_username=current_user.username).first_or_404()
         user.b_show_all = not user.b_show_all
-    return redirect(url_for("main.todolist", id=todolist_id))
+    return redirect(url_for("main.todolist", todolist_id=todolist_id))
 
+@main.route("/set_todo_done/<int:todolist_id>/<int:todo_id>/", methods=["GET", "POST"])
+@login_required
+def set_todo_done(todolist_id, todo_id):
+    todo = Todo.query.get_or_404(todo_id)
+    todo.is_finished = not todo.is_finished
+    todo.finished_at = datetime.utcnow() if todo.is_finished else None
+    todo.save()
+    return redirect(url_for("main.todolist", todolist_id=todolist_id))
 
 @main.route("/todo_item/<int:todolist_id>/<int:todo_id>/", methods=["GET", "POST"])
 @login_required
 def todo_item(todolist_id, todo_id):
     todo = Todo.query.get_or_404(todo_id)
     form = TodoEditForm(tags=todo.tags,
-                        description=msg_demark(todo.description),
+                        description=msg_unmark(todo.description),
                         assigned=todo.assigned,
                         is_finished=todo.is_finished,
                         finished_at=todo.finished_at)
@@ -92,8 +100,11 @@ def todo_item(todolist_id, todo_id):
             todo.goal_at = args["goal"]
         else:
             todo.goal_at = None
-        todo.save()
-        return redirect(url_for("main.todolist", id=todolist_id))
+        if (todo.tags == "" or todo.tags is None) and (todo.description == "" or todo.description is None):
+            todo.delete()
+        else:
+            todo.save()
+        return redirect(url_for("main.todolist", todolist_id=todolist_id))
     return render_template("todo_item.html", form=form, todo_id=todo_id, todolist_id=todolist_id)
 
 
@@ -102,9 +113,9 @@ def todo_item(todolist_id, todo_id):
 def todo_item_new(todolist_id):
     form = TodoEditForm()
     if form.validate_on_submit():
-        Todo(msg_demark(form.description.data).strip(), todolist_id,
+        Todo(msg_unmark(form.description.data).strip(), todolist_id,
              creator=_get_user(),
              tags=form.tags.data.strip(),
              assigned_to=form.assigned.data).save()
-        return redirect(url_for("main.todolist", id=todolist_id))
+        return redirect(url_for("main.todolist", todolist_id=todolist_id))
     return render_template("todo_item.html", form=form, todolist_id=todolist_id)

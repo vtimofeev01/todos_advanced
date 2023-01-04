@@ -287,7 +287,7 @@ class Todo(db.Model, BaseModel):
     def f_finished(self):
         if self.is_finished:
             return self.finished_at.strftime(DATE_FORMAT)
-        return "open"
+        return ""
 
     @property
     def f_created(self):
@@ -303,7 +303,7 @@ class Todo(db.Model, BaseModel):
     @property
     def goal_state(self):
         now = datetime.utcnow()
-        goal = LAST_DATE if self.goal_at is None else self.goal_at
+        goal = LAST_DATE if self.goal_at is None else self.goal_at + timedelta(days=1)
         if self.is_finished and goal < self.finished_at:
             return 'is_outdated'
         elif self.is_finished and goal >= self.finished_at:
