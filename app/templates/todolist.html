@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "table_todo.html" import render_table %}
+
+
+{% block js %}
+    <script src="{{ url_for('static', filename='js/todolist.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+
+    <section class="header">
+        <h2 class="title">{{ todolist.title|title }} </h2>
+        <div class="row">
+            <div class="open-todos">
+                {% if current_user.b_show_all %}
+                    {{ render_table(todolist.todos_all, current_user=current_user, todolist_id=todolist.id) }}
+                {% else %}
+                    {{ render_table(todolist.todos_actual, current_user=current_user, todolist_id=todolist.id) }}
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

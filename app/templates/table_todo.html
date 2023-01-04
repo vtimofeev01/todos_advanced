@@ -1,0 +1,43 @@
+{% from "single_todo.html" import render_todo %}
+
+{% macro render_table(todos, current_user, todolist_id) %}
+    <table>
+        <tr>
+            <th>id</th>
+            <th>От:</th>
+            <th></th>
+            <th>Отв.:</th>
+            <th>План:</th>
+            <th>Завершено:</th>
+        </tr>
+        {% for todo in todos %}
+            <tr>
+                <td class="id">{{ todo.id }}
+                {% if current_user and current_user._username == todo.creator %}
+                    <a href="{{ url_for('main.todo_item',todolist_id=todolist_id, todo_id=todo.id) }}">...</a>
+                {% endif %}
+            </td>
+                <td class="id" data-tooltip=" {{ todo.creator }}">
+                    {{ todo.f_created }}
+                </td>
+                <td class="description">
+                    {% if todo.f_tags != "" %}
+                    <span class="marked">{{ todo.tags }}</span>
+                    {% endif %}
+                    {{ todo.description | safe }}
+                </td>
+                <td class="assigned">{%  if todo.assigned %}{{ todo.assigned }}{% endif %}</td>
+                <td class="goal_at {{ todo.goal_state }}">{{ todo.f_goal }}</td>
+                <td class="finished_at">
+                    {% if  todo.is_finished %}
+                        <input type="checkbox" id="checkbox" data-todo-id="{{ todo.id }}" checked="checked">
+                    {% else %}
+                        <input type="checkbox" id="checkbox" data-todo-id="{{ todo.id }}">
+                    {% endif %}
+                    {{ todo.f_finished }}
+                </td>
+            </tr>
+{#            {% endif %}#}
+        {% endfor %}
+    </table>
+{% endmacro %}

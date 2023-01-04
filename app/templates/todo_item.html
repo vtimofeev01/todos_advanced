@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% from 'macro_render_field.html' import render_field %}
+
+
+{% block body %}
+    <section class="header">
+        {% if  todo_id %}
+            <h2 class="title">{{ current_user._username }} Edits #{{ todo_id }}</h2>
+        {% else %}
+            <h2 class="title">{{ current_user._username }} adds new item</h2>
+        {% endif %}
+        <div class="row">
+            <div class="three columns value-prop"></div>
+            <div class="six columns">
+                {% if form.errors %}
+                    <div class="has-error"><strong>ERROR</strong></div>
+                {% endif %}
+                <form method=post>
+                    {{ form.hidden_tag() }}
+                    <dl>
+                        {{ render_field(form.tags,  class_="u-full-width", maxlength=1000) }}
+                        <p id="p_tags_list"></p>
+                        {{ render_field(form.description,  class_="u-full-width", maxlength=2000) }}
+                        <p id="p_in_text_list"></p>
+                        {{ render_field(form.assigned,  class_="u-full-width", maxlength=64) }}
+                        {% if todo_id %}
+                            {{ render_field(form.is_finished,  class_="u-full-width") }}
+                            {% if form.is_finished.data %}
+                                {{ render_field(form.finished_at,  class_="u-full-width") }}
+                            {% endif %}
+                        {% endif %}
+                        {{ render_field(form.submit) }}
+                    </dl>
+                </form>
+            </div>
+        </div>
+        <script>
+
+            function appendToId(myVariable, elem_id, before="", after="") {
+                if (document.getElementById(elem_id).innerHTML.search(myVariable) === -1) {
+                    document.getElementById(elem_id).innerHTML += before + myVariable + after;
+                }
+            }
+
+            async function displayWord() {
+                let apiURL = "{{url_for('api.used_get_tags', todolist_id=todolist_id)}}"
+                let apiURL2 = "{{url_for('api.used_in_text_tags', todolist_id=todolist_id)}}"
+                try {
+                    let appArr = await fetch(apiURL).then(res => res.json());
+                    let tags_list = "";
+                    appArr.tags.forEach((item) => {
+                        tags_list += "<a class='add_tag'>" + item + "</a>  ";
+                    })
+                    document.getElementById("p_tags_list").innerHTML = tags_list;
+                    $(".add_tag").bind('click', function (event) {
+                        appendToId(this.innerHTML, "tags", " ")
+                    })
+                } catch (err) {
+                    console.error(err)
+                }
+
+                try {
+                    let appArr = await fetch(apiURL2).then(res => res.json());
+                    let tags_list = "";
+                    appArr.tags.forEach((item) => {
+                        tags_list += "<a class='add_text_tag'>" + item + "</a>  ";
+                    })
+                    document.getElementById("p_in_text_list").innerHTML = tags_list;
+                    $(".add_text_tag").bind('click', function (event) {
+                        appendToId(this.innerHTML, "description", "[","]")
+                    })
+                } catch (err) {
+                    console.error(err)
+                }
+            }
+
+            displayWord()
+        </script>
+    </section>
+{% endblock %}
