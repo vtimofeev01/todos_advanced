@@ -2,7 +2,7 @@
 
 table.tablesorter {
   background-color: #CDCDCD;
-  margin: 10px 0pt 15px;
+  margin: 10px 0 15px;
   width: 100%;
   text-align: left;
 }
@@ -26,7 +26,7 @@ table.tablesorter tfoot tr th {
 }
 
 table.tablesorter th:last-child {
-  border-right: 0px solid #FFF;
+  border-right: 0 solid #FFF;
 }
 
 table.tablesorter thead tr .header {

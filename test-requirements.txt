@@ -1,5 +1,5 @@
 -r requirements.txt
 Flask-Testing>=0.8.1
-blinker>=1.4
+blinker==1.5
 ForgeryPy>=0.1
 python-dotenv>=0.17.1

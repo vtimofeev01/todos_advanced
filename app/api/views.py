@@ -1,4 +1,4 @@
-from flask import abort, request, url_for
+from flask import abort, request, url_for, jsonify
 from flask_login import login_required
 
 from app.api import api
@@ -33,9 +33,11 @@ def add_user():
             email=request.json.get("email"),
             password=request.json.get("password"),
         ).save()
+        return user.to_dict(), 201
     except:
         abort(400)
-    return user.to_dict(), 201
+    return {}, 201
+
 
 
 @api.route("/user/<string:username>/todolists/")

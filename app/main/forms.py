@@ -1,8 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, BooleanField, DateField, DateTimeField, DateTimeLocalField
+from wtforms import StringField, SubmitField, TextAreaField, BooleanField, DateField
 from wtforms.validators import Length, InputRequired
-
-from app.common_constants import DATE_TIME_FORMAT
 
 
 class TodoForm(FlaskForm):
@@ -10,6 +8,7 @@ class TodoForm(FlaskForm):
     todo = TextAreaField("Enter your todo", validators=[InputRequired(), Length(1, 2000)])
     assigned = StringField("Assigned to", validators=[InputRequired(), Length(1, 64)])
     submit = SubmitField("Submit")
+
 
 class TodoEditForm(FlaskForm):
     tags = TextAreaField("Enter your tags", validators=[InputRequired(), Length(1, 1024)],

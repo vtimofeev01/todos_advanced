@@ -32,7 +32,7 @@ def msg_unmark(s:str):
 
 
 
-def msg_parse(s: str, candidates=None):
+def msg_parse(s: str):
     out = dict()
     #     find goal
     # out['s'] = s
