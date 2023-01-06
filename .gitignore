@@ -15,6 +15,7 @@ dist
 results
 venv
 migrations
+.env
 
 # editor
 .ropeproject
