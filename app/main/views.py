@@ -67,8 +67,7 @@ def add_todolist():
 @login_required
 def set_view_filter(todolist_id):
     if current_user.is_authenticated:
-        user = User.query.filter_by(_username=current_user.username).first_or_404()
-        user.b_show_all = not user.b_show_all
+        current_user.b_show_all = not current_user.b_show_all
     return redirect(url_for("main.todolist", todolist_id=todolist_id))
 
 @main.route("/set_todo_done/<int:todolist_id>/<int:todo_id>/", methods=["GET", "POST"])

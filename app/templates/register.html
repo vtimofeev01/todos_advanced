@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from 'macro_render_field.html' import render_field %}
 
 {% block body %}
 <section class="header">
@@ -12,10 +13,11 @@
       <form method=post>
         {{ form.hidden_tag() }}
         <dl>
-          <dd>{{ form.username(class_="u-full-width", placeholder="Username", maxlength=64) }}
-          <dd>{{ form.email(class_="u-full-width", placeholder="Email", maxlength=64) }}
-          <dd>{{ form.password(class_="u-full-width", placeholder="Password") }}
-          <dd>{{ form.password_confirmation(class_="u-full-width", placeholder="Confirm your Password") }}
+{#          <dd>{{ form.username(class_="u-full-width", placeholder="Username", maxlength=64) }}#}
+          <dd>{{ render_field(form.username, class_="u-full-width", placeholder="Username", maxlength=64) }}
+          <dd>{{ render_field(form.email, class_="u-full-width", placeholder="Email", maxlength=64) }}
+          <dd>{{ render_field(form.password, class_="u-full-width", placeholder="Password") }}
+          <dd>{{ render_field(form.password_confirmation, class_="u-full-width", placeholder="Confirm your Password") }}
           <dt>{{ form.submit }}
         </dl>
       </form>
