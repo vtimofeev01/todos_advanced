@@ -99,7 +99,9 @@ class User(UserMixin, db.Model):
 
     def seen(self):
         self.last_seen = datetime.utcnow()
-        return self.save()
+        db.session.add(self)
+        db.session.commit()
+        return self
 
     def to_dict(self):
         return {

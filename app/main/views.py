@@ -13,7 +13,6 @@ from app.parse_text import msg_mark
 
 
 @main.route("/")
-@login_required
 def index():
     # return render_template("index.html", form=form)
     return redirect(url_for("main.todolist_overview"))
