@@ -95,7 +95,7 @@ def todo_item(todolist_id, todo_id):
             todo.goal_at = args["goal"]
         else:
             todo.goal_at = None
-        if (todo.tags == "" or todo.tags is None) and (todo.description == "" or todo.description is None):
+        if todo.description == "" or todo.description is None:
             db.session.delete(todo)
             # todo.delete()
             db.session.commit()

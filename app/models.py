@@ -33,35 +33,7 @@ def check_length(attribute, length):
         return False
 
 
-class BaseModel:
-    """Base for all models, providing save, delete and from_dict methods."""
-
-    # def __commit(self):
-    #     """Commits the current db.session, does rollback on failure."""
-    #     from sqlalchemy.exc import IntegrityError
-    #
-    #     try:
-    #         db.session.commit()
-    #     except IntegrityError:
-    #         db.session.rollback()
-    #
-    # def delete(self):
-    #     """Deletes this model from the db (through db.session)"""
-    #     db.session.delete(self)
-    #     self.__commit()
-    #
-    # def save(self):
-    #     """Adds this model to the db (through db.session)"""
-    #     db.session.add(self)
-    #     self.__commit()
-    #     return self
-    #
-    # @classmethod
-    # def from_dict(cls, model_dict):
-    #     return cls(**model_dict).save()
-
-
-class User(UserMixin, db.Model, BaseModel):
+class User(UserMixin, db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     _username = db.Column("username", db.String(64), unique=True)
@@ -148,12 +120,12 @@ class User(UserMixin, db.Model, BaseModel):
 
 @login_manager.user_loader
 def load_user(user_id):
-    us = User.query.get_or_404(int(user_id))
-    sleep(.020)
+    # us = User.query.get_or_404(int(user_id))
+    us = db.session.get(User, int(user_id))
     return us
 
 
-class TodoList(db.Model, BaseModel):
+class TodoList(db.Model):
     __tablename__ = "todolist"
     id = db.Column(db.Integer, primary_key=True)
     _title = db.Column("title", db.String(128))
@@ -255,7 +227,7 @@ class TodoList(db.Model, BaseModel):
         return sorted(set_of_tags)
 
 
-class Todo(db.Model, BaseModel):
+class Todo(db.Model):
     __tablename__ = "todo"
     id = db.Column(db.Integer, primary_key=True)
     tags = db.Column(db.String(1024))
