@@ -4,7 +4,7 @@ BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
 
 def create_sqlite_uri(db_name):
-    # return 'mysql://username:password@localhost/db_name'
+    # return 'mysql://vtimof01_todo:VaTeFairePrendre01.@localhost/vtimof01_todo'
     return "sqlite:///" + os.path.join(BASEDIR, db_name)
 
 

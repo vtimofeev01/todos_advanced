@@ -1,24 +1,18 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, BooleanField, DateField
-from wtforms.validators import Length, InputRequired
-
-
-class TodoForm(FlaskForm):
-    tag = StringField("Enter your tags", validators=[InputRequired(), Length(1, 1000)])
-    todo = TextAreaField("Enter your todo", validators=[InputRequired(), Length(1, 2000)])
-    assigned = StringField("Assigned to", validators=[InputRequired(), Length(1, 64)])
-    submit = SubmitField("Submit")
+from wtforms import StringField, SubmitField, TextAreaField, BooleanField, DateField, HiddenField
+from wtforms.validators import Length, InputRequired, DataRequired
 
 
 class TodoEditForm(FlaskForm):
-    tags = TextAreaField("Enter your tags", validators=[InputRequired(), Length(1, 1024)],
+    tags = TextAreaField("Enter your tags", validators=[InputRequired(), Length(0, 1024)],
                          render_kw={"placeholder": "Enter your tags"})
-    description = TextAreaField("Enter your todo", validators=[InputRequired(), Length(1, 2000)],
+    description = HiddenField("Enter your todo", validators=[InputRequired(), Length(0, 2000)],
                                 render_kw={"placeholder": "Enter your task"})
     assigned = StringField("Assigned to", validators=[InputRequired(), Length(1, 64)],
                            render_kw={"placeholder": "Assigned to"})
     is_finished = BooleanField("finished")
     finished_at = DateField('Which date is your favorite?')
+
     submit = SubmitField("Submit")
 
 

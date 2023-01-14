@@ -1,8 +1,10 @@
 import re
 from datetime import datetime, timedelta
+from time import sleep
 
 from flask import url_for
 from flask_login import UserMixin
+from sqlalchemy import or_, and_, not_
 from sqlalchemy.orm import synonym
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -12,15 +14,15 @@ from app.parse_text import msg_mark, extract_tags
 
 EMAIL_REGEX = re.compile(r"^\S+@\S+\.\S+$")
 USERNAME_REGEX = re.compile(r"^\S+$")
-NO_DATE = datetime(1990, 1, 1)
 LAST_DATE = datetime(2990, 1, 1)
+UNEAR_INTERVAL = timedelta(days=2)
 NEAR_INTERVAL = timedelta(days=7)
+MID_INTERVAL = timedelta(days=30)
 FAR_INTERVAL = timedelta(days=60)
 
 F_ACTIVE = 1
 F_PRIVATE = 2
 F_GOAL = 4
-
 
 
 def check_length(attribute, length):
@@ -34,29 +36,29 @@ def check_length(attribute, length):
 class BaseModel:
     """Base for all models, providing save, delete and from_dict methods."""
 
-    def __commit(self):
-        """Commits the current db.session, does rollback on failure."""
-        from sqlalchemy.exc import IntegrityError
-
-        try:
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-
-    def delete(self):
-        """Deletes this model from the db (through db.session)"""
-        db.session.delete(self)
-        self.__commit()
-
-    def save(self):
-        """Adds this model to the db (through db.session)"""
-        db.session.add(self)
-        self.__commit()
-        return self
-
-    @classmethod
-    def from_dict(cls, model_dict):
-        return cls(**model_dict).save()
+    # def __commit(self):
+    #     """Commits the current db.session, does rollback on failure."""
+    #     from sqlalchemy.exc import IntegrityError
+    #
+    #     try:
+    #         db.session.commit()
+    #     except IntegrityError:
+    #         db.session.rollback()
+    #
+    # def delete(self):
+    #     """Deletes this model from the db (through db.session)"""
+    #     db.session.delete(self)
+    #     self.__commit()
+    #
+    # def save(self):
+    #     """Adds this model to the db (through db.session)"""
+    #     db.session.add(self)
+    #     self.__commit()
+    #     return self
+    #
+    # @classmethod
+    # def from_dict(cls, model_dict):
+    #     return cls(**model_dict).save()
 
 
 class User(UserMixin, db.Model, BaseModel):
@@ -146,7 +148,9 @@ class User(UserMixin, db.Model, BaseModel):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get_or_404(int(user_id))
+    us = User.query.get_or_404(int(user_id))
+    sleep(.020)
+    return us
 
 
 class TodoList(db.Model, BaseModel):
@@ -212,8 +216,18 @@ class TodoList(db.Model, BaseModel):
     @property
     def todos_actual(self):
         now = datetime.utcnow()
-        a_filter = (Todo.is_finished == False) | (Todo.finished_at > (now - NEAR_INTERVAL))
-        return self.todos.filter(a_filter).order_by(Todo.tags, Todo.id)
+        now_l_mid = now - MID_INTERVAL
+        now_l_near = now - NEAR_INTERVAL
+
+        return self.todos.filter(
+            or_(
+                or_(
+                    and_(Todo.goal_at is None, Todo.created_at > now_l_mid),
+                    and_(Todo.goal_at is not None, not_(Todo.is_finished))
+                ),
+                and_(Todo.is_finished, Todo.finished_at > now_l_near)
+            )
+        ).order_by(Todo.tags, Todo.id)
 
     @property
     def todos_all(self):
@@ -237,8 +251,8 @@ class TodoList(db.Model, BaseModel):
         set_of_tags = set()
         for todo in self.todos.filter(a_filter):
             set_of_tags.update(extract_tags(todo.description))
+        print(f'set of tage:{set_of_tags}')
         return sorted(set_of_tags)
-
 
 
 class Todo(db.Model, BaseModel):
@@ -247,7 +261,7 @@ class Todo(db.Model, BaseModel):
     tags = db.Column(db.String(1024))
     description = db.Column(db.String(2048))
     created_at = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    goal_at = db.Column(db.DateTime, index=True, default=NO_DATE)
+    goal_at = db.Column(db.DateTime, index=True, default=None)
     finished_at = db.Column(db.DateTime, index=True, default=None)
     is_finished = db.Column(db.Boolean, default=False)
     creator = db.Column(db.String(64), db.ForeignKey("user.username"))
@@ -265,8 +279,9 @@ class Todo(db.Model, BaseModel):
         if assigned_to:
             self.assigned = assigned_to
         if 'goal' in args:
-            print(f"[TODO] {args['goal']}")
             self.goal_at = args["goal"]
+        else:
+            self.goal_at = None
 
     def __repr__(self):
         return "<{} Todo: {} by {}>".format(
@@ -275,11 +290,20 @@ class Todo(db.Model, BaseModel):
 
     @property
     def status(self):
-        return "finished" if self.is_finished else "open"
+        if self.goal_at  is None:
+            return 'is_info'
+        elif self.is_finished:
+            return 'is_finished'
+        elif self.goal_at < datetime.utcnow():
+            return 'is_outdated'
+        return 'is_open'
+
+
+        # return "finished" if self.is_finished else "open"
 
     @property
     def f_goal(self):
-        if self.goal_at == NO_DATE:
+        if self.goal_at is None:
             return ""
         return self.goal_at.strftime(DATE_FORMAT)
 
@@ -310,6 +334,8 @@ class Todo(db.Model, BaseModel):
             return ""
         elif goal < now:
             return 'is_outdated'
+        elif goal < now + UNEAR_INTERVAL:
+            return 'is_next_day'
         elif goal < now + NEAR_INTERVAL:
             return 'is_near'
         return ''
@@ -326,7 +352,6 @@ class Todo(db.Model, BaseModel):
         if self.finished_at is not None and self.finished_at >= limit:
             return True
         return False
-
 
     def finished(self):
         self.is_finished = True
@@ -349,6 +374,3 @@ class Todo(db.Model, BaseModel):
             "goal": self.goal_at,
             "status": self.status,
         }
-
-
-

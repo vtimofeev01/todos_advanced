@@ -4,23 +4,46 @@
 
 {% block body %}
     <section class="header">
+        <style>
+            body > #standalone-container {
+                margin: 50px auto;
+                max-width: 720px;
+            }
+
+            #editor-container {
+                height: 350px;
+            }
+        </style>
+
         {% if  todo_id %}
             <h2 class="title">{{ current_user._username }} Edits #{{ todo_id }}</h2>
         {% else %}
             <h2 class="title">{{ current_user._username }} adds new item</h2>
         {% endif %}
+
         <div class="row">
             <div class="three columns value-prop"></div>
             <div class="six columns">
                 {% if form.errors %}
                     <div class="has-error"><strong>ERROR</strong></div>
                 {% endif %}
-                <form method=post>
+                <form method=post id="form">
                     {{ form.hidden_tag() }}
                     <dl>
                         {{ render_field(form.tags,  class_="u-full-width", maxlength=1000) }}
                         <p id="p_tags_list"></p>
-                        {{ render_field(form.description,  class_="u-full-width", maxlength=2000) }}
+                        <div class="u-full-width" id="standalone-container">
+                            <div id="toolbar-container">
+                                <button class="ql-bold"></button>
+                                <button class="ql-list" value="ordered"></button>
+                                <button class="ql-list" value="bullet"></button>
+                                <button class="ql-indent" value="-1"></button>
+                                <button class="ql-indent" value="+1"></button>
+                                <button class="ql-link"></button>
+                                <button class="ql-clean"></button>
+                            </div>
+                            <div id="editor-container"></div>
+                        </div>
                         <p id="p_in_text_list"></p>
                         {{ render_field(form.assigned,  class_="u-full-width", maxlength=64) }}
                         {% if todo_id %}
@@ -34,9 +57,22 @@
                 </form>
             </div>
         </div>
+
+
+        <script>
+            let quill = new Quill('#editor-container', {
+                modules: {
+                    syntax: true,
+                    toolbar: '#toolbar-container'
+                },
+                placeholder: 'Compose event here..',
+                theme: 'snow'
+            });
+        </script>
+
         <script>
 
-            function appendToId(myVariable, elem_id, before="", after="") {
+            function appendToId(myVariable, elem_id, before = "", after = "") {
                 if (document.getElementById(elem_id).innerHTML.search(myVariable) === -1) {
                     document.getElementById(elem_id).innerHTML += before + myVariable + after;
                 }
@@ -67,7 +103,7 @@
                     })
                     document.getElementById("p_in_text_list").innerHTML = tags_list;
                     $(".add_text_tag").bind('click', function (event) {
-                        appendToId(this.innerHTML, "description", "[","]")
+                        appendToId(this.innerHTML, "description", "[", "]")
                     })
                 } catch (err) {
                     console.error(err)
@@ -75,6 +111,25 @@
             }
 
             displayWord()
+        </script>
+
+
+        <script>
+            {#// When the submit button is pressed, retrieve several pieces of info#}
+            {#// from the QuillJS API (https://quilljs.com/docs/api/#content), copy#}
+            {#// them into to WTForms hidden fields, and submit the form#}
+            let descr_area = document.getElementById('description');
+            let submit_entry = function () {
+                descr_area.value = quill.root.innerHTML;
+                return true
+            }
+            let new_post_form = document.getElementById('form');
+            new_post_form.onsubmit = submit_entry;
+            let old_content = descr_area.value;
+            const delta = quill.clipboard.convert(old_content);
+            quill.setContents(delta, 'silent');
+
+
         </script>
     </section>
 {% endblock %}

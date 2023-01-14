@@ -1,2 +1,2 @@
 DATE_TIME_FORMAT = 'dd-MM-yyyyThh:mm'
-DATE_FORMAT = '%d.%m.%Y'
+DATE_FORMAT = '%-d.%-m.%y'

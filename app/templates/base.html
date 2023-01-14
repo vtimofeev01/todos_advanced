@@ -14,10 +14,18 @@
     <link rel="stylesheet" type='text/css'
           href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/quill.snow.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css"/>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/monokai-sublime.min.css"/>
+
     {% block css %}{% endblock %}
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/site.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+    {#    <script type="text/javascript" src="{{ url_for('static', filename='js/site.js') }}"></script>#}
+    <script src="{{ url_for('static', filename='js/quill.min.js') }}"></script>
     {% block js %}{% endblock %}
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}"/>
 </head>
@@ -38,34 +46,26 @@
 
                         {% if current_user.b_show_all %}
                             <li class="navbar-item">
-                                <a class="navbar-link" href="{{ url_for('main.set_view_filter',todolist_id=todolist.id) }}">
+                                <a class="navbar-link"
+                                   href="{{ url_for('main.set_view_filter',todolist_id=todolist.id) }}">
                                     view to ACTUAL</a></li>
                         {% else %}
-                            <li class="navbar-item"><a class="navbar-link"
-                                                       href="{{ url_for('main.set_view_filter', todolist_id=todolist.id) }}">view
-                                to FULL</a></li>
+                            <li class="navbar-item">
+                                <a class="navbar-link"
+                                   href="{{ url_for('main.set_view_filter', todolist_id=todolist.id) }}">view
+                                    to FULL</a></li>
                         {% endif %}
 
                         <li class="navbar-item">
-                            <a class="navbar-link" href="{{ url_for('main.todo_item_new', todolist_id=todolist.id) }}">
+                            <a class="navbar-link"
+                               href="{{ url_for('main.todo_item_new_from_id', todolist_id=todolist.id, from_id=999999999) }}">
                                 add new item</a></li>
+
+                        <li class="navbar-item">
+                            <a class="navbar-link" href="{{ url_for('auth.logout') }}">logout</a>
+                        </li>
+
                     {% endif %}
-
-
-                    <li class="navbar-item">
-                        <a class="navbar-link" href="#" data-popover="#moreNavPopover">{{ current_user.username }}</a>
-                        <div id="moreNavPopover" class="popover">
-                            <ul class="popover-list">
-                                <li class="popover-item">
-                                    <a class="popover-link" href="{{ url_for('main.todolist_overview') }}">Your
-                                        Todo lists</a>
-                                </li>
-                                <li class="popover-item">
-                                    <a class="popover-link" href="{{ url_for('auth.logout') }}">logout</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
                 {% endif %}
             </ul>
         </div>
