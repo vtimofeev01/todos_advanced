@@ -4,7 +4,6 @@ from datetime import datetime
 from flask import redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-import app
 from app import parse_text, db
 from app.main import main
 from app.main.forms import TodoListForm, TodoEditForm
@@ -27,8 +26,12 @@ def todolist_overview():
     return render_template("overview.html", form=form, proteus=random.randint(1000, 9999))
 
 
-def _get_user():
+def _get_username():
     return current_user.username if current_user.is_authenticated else None
+
+
+# def _get_user():
+#     return current_user.username if current_user.is_authenticated else None
 
 
 @main.route("/todolist<int:proteus>/<int:todolist_id>/", methods=["GET", "POST"])
@@ -43,7 +46,7 @@ def todolist(proteus, todolist_id):
 def add_todolist():
     form = TodoListForm(todo=request.form.get("title"))
     if form.validate():
-        l_todolist = TodoList(form.title.data, _get_user())  #.save()
+        l_todolist = TodoList(form.title.data, _get_username())  #.save()
         db.session.add(l_todolist)
         db.session.commit()
         return redirect(url_for("main.todolist", proteus=random.randint(10000, 90000), todolist_id=l_todolist.id))
@@ -96,10 +99,8 @@ def todo_item(todolist_id, todo_id):
             todo.goal_at = None
         if todo.description == "" or todo.description is None:
             db.session.delete(todo)
-            # todo.delete()
             db.session.commit()
         else:
-            # db.session.add(todo)
             db.session.commit()
         return redirect(url_for("main.todolist", proteus=random.randint(10000, 90000), todolist_id=todolist_id, _anchor=todo_id))
     return render_template("todo_item.html", form=form, todo_id=todo_id, todolist_id=todolist_id)
@@ -115,7 +116,7 @@ def todo_item_new_from_id(todolist_id, from_id):
         todo = Todo(
             description=form.description.data.strip(),
             todolist_id=todolist_id,
-            creator=_get_user(),
+            creator=_get_username(),
             tags=form.tags.data.strip(),
             assigned_to=form.assigned.data) # .save()
         db.session.add(todo)

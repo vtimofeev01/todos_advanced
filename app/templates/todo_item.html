@@ -14,11 +14,18 @@
                 height: 350px;
             }
         </style>
+        {% if current_user %} {{ current_user._username }} {% endif %}
+
+        {#        {% if  todo_id %}#}
+        {#            <h2 class="title">{{ current_user._username }} Edits #{{ todo_id }}</h2>#}
+        {#        {% else %}#}
+        {#            <h2 class="title">{{ current_user._username }} adds new item</h2>#}
+        {#        {% endif %}#}
 
         {% if  todo_id %}
-            <h2 class="title">{{ current_user._username }} Edits #{{ todo_id }}</h2>
+            <h2 class="title"> Event #{{ todo_id }}</h2>
         {% else %}
-            <h2 class="title">{{ current_user._username }} adds new item</h2>
+            <h2 class="title">New Event</h2>
         {% endif %}
 
         <div class="row">
