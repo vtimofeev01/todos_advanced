@@ -51,6 +51,17 @@ p.cell_view {
     font-weight: bold;
 }
 
+span.finished_at{
+    display: inline;
+        font-weight: bold;
+}
+
+span.assigned_to{
+    display: inline;
+        font-weight: bold;
+}
+
+
 .description {
   max-width: 1000px;
 }
@@ -264,7 +275,6 @@ input:checked + .slider:before {
         padding: 6rem 0;
     }
 
-    td.assigned, th.assigned,
     td.goal_at, th.goal_at,
     td.finished_at, th.finished_at
     {
@@ -273,6 +283,9 @@ input:checked + .slider:before {
     p.cell_view{
         display: none;
     }
+    span.finished_at{
+    display: none;
+}
 }
 
 
@@ -438,11 +451,17 @@ input:checked + .slider:before {
         border-bottom-color: #33C3F0;
     }
 
-    td.created, th.created
+    td.created, th.created,
+    td.assigned, th.assigned
     {
         display: table-cell;
     }
     p.cell_view{
         display: none;
     }
+
+    span.assigned_to{
+    display: none;
+}
+
 }

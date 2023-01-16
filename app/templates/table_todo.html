@@ -36,18 +36,18 @@
                     </td>
                     <td class="description">
                         {{ todo.description | safe }}
-                        <p class="cell_view">
-                            {% if todo.is_finished and todo.editable %}
-                                Отв.{{ todo.assigned }}
-                                <a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
-                                    {{ todo.f_finished }} </a>
-                            {% elif todo.is_finished %} Отв.{{ todo.assigned }} {{ todo.f_finished }}
-                            {% elif todo.f_goal %}
-                                Отв.{{ todo.assigned }}
-                                <a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
-                                    &check; </a>
-                            {% endif %}
-                        </p>
+                        {% if todo.is_finished and todo.editable %}
+                            <span class="assigned_to"> Отв.{{ todo.assigned }}</span>
+                            <span class="finished_at"><a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
+                                {{ todo.f_finished }} </a></span>
+                        {% elif todo.is_finished %}
+                            <span class="assigned_to">Отв.{{ todo.assigned }} </span>
+                            <span class="finished_at">{{ todo.f_finished }}</span>
+                        {% elif todo.f_goal %}
+                            <span class="assigned_to">Отв.{{ todo.assigned }}</span>
+                            <span class="finished_at"><a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
+                                &check; </a></span>
+                        {% endif %}
 
                     </td>
                     <td class="assigned">{% if todo.assigned %}{{ todo.assigned }}{% endif %}</td>
