@@ -61,11 +61,13 @@
                                href="{{ url_for('main.todo_item_new_from_id', todolist_id=todolist.id, from_id=999999999) }}">
                                 add new item</a></li>
 
-                        <li class="navbar-item">
-                            <a class="navbar-link" href="{{ url_for('auth.logout') }}">logout</a>
-                        </li>
+
 
                     {% endif %}
+
+                    <li class="navbar-item">
+                        <a class="navbar-link" href="{{ url_for('auth.logout') }}">logout</a>
+                    </li>
                 {% endif %}
             </ul>
         </div>

@@ -264,7 +264,6 @@ input:checked + .slider:before {
         padding: 6rem 0;
     }
 
-    td.created, th.created,
     td.assigned, th.assigned,
     td.goal_at, th.goal_at,
     td.finished_at, th.finished_at
@@ -437,5 +436,13 @@ input:checked + .slider:before {
     .popover-link:hover,
     .popover-item:first-child .popover-link:hover:after {
         border-bottom-color: #33C3F0;
+    }
+
+    td.created, th.created
+    {
+        display: table-cell;
+    }
+    p.cell_view{
+        display: none;
     }
 }
