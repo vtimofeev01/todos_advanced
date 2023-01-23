@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from config import config
 
 db = SQLAlchemy()
-migrate = Migrate()
+# migrate = Migrate()
 
 login_manager = LoginManager()
 login_manager.session_protection = "strong"
@@ -20,9 +20,11 @@ def create_app(config_name):
     # db.engine.execute("set session wait_timeout = 600;")
 
     db.init_app(app)
-    migrate.init_app(app, db=db)
-    with app.app_context():
-        db.engine.execute("set session wait_timeout = 600;")
+    # migrate.init_app(app, db=db)
+    # with app.app_context():
+    #     db.engine.execute("set session wait_timeout = 600;")
+    #     db.engine.execute("set global max_allowed_packet=268435456;")
+    #     db.engine.execute("set global net_read_timeout = 1000; ")
     login_manager.init_app(app)
 
     from .main import main as main_blueprint

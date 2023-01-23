@@ -1,6 +1,5 @@
 import re
 from datetime import datetime, timedelta
-from time import sleep
 
 from flask import url_for
 from flask_login import UserMixin
@@ -10,7 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db, login_manager, parse_text
 from app.common_constants import DATE_FORMAT
-from app.parse_text import msg_mark, extract_tags
+from app.parse_text import extract_tags, text_parse
 
 EMAIL_REGEX = re.compile(r"^\S+@\S+\.\S+$")
 USERNAME_REGEX = re.compile(r"^\S+$")
@@ -244,6 +243,7 @@ class Todo(db.Model):
 
     def __init__(self, description, todolist_id, creator=None, created_at=None, tags=None, assigned_to=None):
         self.description = msg_mark(description)
+        # self.description = text_parse(description)
         self.todolist_id = todolist_id
         self.creator = creator
         self.created_at = created_at or datetime.utcnow()
