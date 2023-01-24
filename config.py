@@ -13,10 +13,6 @@ class Config:
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_RECORD_QUERIES = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    # SQLALCHEMY_ENGINE_OPTIONS = {
-    #     'connect_args': {"timeout": 15}
-    # }
-    # SQLALCHEMY_POOL_TIMEOUT = 45
 
     @staticmethod
     def init_app(app):
@@ -28,23 +24,7 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = create_sqlite_uri("todolist-dev.db")
 
 
-class TestingConfig(Config):
-    # TESTING = True
-    SQLALCHEMY_DATABASE_URI = create_sqlite_uri("todolist-test.db")
-    # WTF_CSRF_ENABLED = False
-    import logging
-
-    logging.basicConfig(format="%(asctime)s:%(levelname)s:%(name)s:%(message)s")
-    logging.getLogger().setLevel(logging.DEBUG)
-
-
-class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = create_sqlite_uri("todolist.db")
-
-
 config = {
     "development": DevelopmentConfig,
-    "testing": TestingConfig,
-    "production": ProductionConfig,
     "default": DevelopmentConfig,
 }

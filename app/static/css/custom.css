@@ -456,6 +456,13 @@ input:checked + .slider:before {
     {
         display: table-cell;
     }
+
+    select {
+        display: inline-block;
+        border-width: 0;
+        border-bottom-width: 2px;
+    }
+
     p.cell_view{
         display: none;
     }

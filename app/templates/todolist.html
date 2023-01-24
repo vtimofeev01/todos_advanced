@@ -13,9 +13,9 @@
         <div class="row">
             <div class="open-todos">
                 {% if current_user.b_show_all %}
-                    {{ render_table(todolist.todos_all, current_user=current_user, todolist_id=todolist.id) }}
+                    {{ render_table(todolist.todos_all, current_user=current_user, todolist_id=todolist.id, todo_list=todolist) }}
                 {% else %}
-                    {{ render_table(todolist.todos_actual, current_user=current_user, todolist_id=todolist.id) }}
+                    {{ render_table(todolist.todos_actual, current_user=current_user, todolist_id=todolist.id, todo_list=todolist) }}
                 {% endif %}
             </div>
         </div>

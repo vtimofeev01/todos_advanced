@@ -1,0 +1,8 @@
+{% macro drop_down_list(label, name, fields) %}
+    <label for="id_{{ name }}"></label><select name="{{ name }}" id="id_{{ name }}">
+    <option value=""></option>
+    {% for field in fields %}
+        <option value="{{ field }}">{{ field }}</option>
+    {% endfor %}
+    </select>
+{% endmacro %}

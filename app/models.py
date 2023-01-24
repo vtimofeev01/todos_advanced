@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db, login_manager, parse_text
 from app.common_constants import DATE_FORMAT
-from app.parse_text import extract_tags, text_parse
+from app.parse_text import extract_tags, msg_mark
 
 EMAIL_REGEX = re.compile(r"^\S+@\S+\.\S+$")
 USERNAME_REGEX = re.compile(r"^\S+$")
@@ -224,8 +224,18 @@ class TodoList(db.Model):
         set_of_tags = set()
         for todo in self.todos.filter(a_filter):
             set_of_tags.update(extract_tags(todo.description))
-        print(f'set of tage:{set_of_tags}')
+        # print(f'set of tage:{set_of_tags}')
         return sorted(set_of_tags)
+
+    @property
+    def get_assigned_to_list(self):
+        print(f"get_assigned_to_list")
+        set_of_assigned = set()
+        for todo in self.todos:
+            print(f"todo.assigned.split(',')={todo.assigned.split(',')}")
+            set_of_assigned.update(todo.assigned.split(','))
+        print(set_of_assigned)
+        return sorted(list(set_of_assigned))
 
 
 class Todo(db.Model):
