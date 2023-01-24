@@ -5,9 +5,8 @@
         <tr>
             <th>id</th>
             <th class="created">От:</th>
-            <th class="description"></th>
-            <th class="assigned">{{ drop_down_list("Отв.:", "assigned_to", todo_list.get_assigned_to_list ) }} </th>
-{#            <th class="assigned">{{ todos.open_count }}</th>#}
+            <th class="description">{{ drop_down_list("Desc.", "description", todo_list.get_used_tags) }}</th>
+            <th class="assigned">{{ drop_down_list("Отв.", "assigned_to", todo_list.get_assigned_to_list(true) ) }} </th>
             <th class="goal_at">План:</th>
             <th class="finished_at"> Вып.</th>
         </tr>

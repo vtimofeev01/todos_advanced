@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db, login_manager, parse_text
 from app.common_constants import DATE_FORMAT
-from app.parse_text import extract_tags, msg_mark
+from app.parse_text import extract_tags, msg_mark, capitalize
 
 EMAIL_REGEX = re.compile(r"^\S+@\S+\.\S+$")
 USERNAME_REGEX = re.compile(r"^\S+$")
@@ -215,7 +215,7 @@ class TodoList(db.Model):
             if not todo.tags:
                 continue
             set_of_tags.update(todo.tags.split())
-        return sorted(set_of_tags)
+        return sorted({capitalize(x.strip()) for x in  set_of_tags})
 
     @property
     def get_in_text_tags(self):
@@ -227,15 +227,22 @@ class TodoList(db.Model):
         # print(f'set of tage:{set_of_tags}')
         return sorted(set_of_tags)
 
-    @property
-    def get_assigned_to_list(self):
-        print(f"get_assigned_to_list")
+    # @property
+    def get_assigned_to_list(self, show_all):
+        now = datetime.utcnow()
+        now_l_mid = now - MID_INTERVAL
+        now_l_near = now - NEAR_INTERVAL
         set_of_assigned = set()
-        for todo in self.todos:
-            print(f"todo.assigned.split(',')={todo.assigned.split(',')}")
-            set_of_assigned.update(todo.assigned.split(','))
-        print(set_of_assigned)
-        return sorted(list(set_of_assigned))
+        if show_all:
+            for todo in self.todos:
+                set_of_assigned.update(todo.assigned.split(','))
+        else:
+            for todo in self.todos(or_(or_(
+                    and_(Todo.goal_at is None, Todo.created_at > now_l_mid),
+                    and_(Todo.goal_at is not None, not_(Todo.is_finished))
+            ), and_(Todo.is_finished, Todo.finished_at > now_l_near))):
+                set_of_assigned.update(todo.assigned.split(','))
+        return sorted(list({capitalize(x.strip()) for x in set_of_assigned}))
 
 
 class Todo(db.Model):
@@ -274,14 +281,13 @@ class Todo(db.Model):
 
     @property
     def status(self):
-        if self.goal_at  is None:
+        if self.goal_at is None:
             return 'is_info'
         elif self.is_finished:
             return 'is_finished'
         elif self.goal_at < datetime.utcnow():
             return 'is_outdated'
         return 'is_open'
-
 
         # return "finished" if self.is_finished else "open"
 
