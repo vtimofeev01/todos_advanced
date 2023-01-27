@@ -23,7 +23,7 @@ def todolist_overview():
     form = TodoListForm()
     if form.validate_on_submit():
         return redirect(url_for("main.add_todolist"))
-    return render_template("overview.html", form=form, proteus=random.randint(1000, 9999))
+    return render_template("overview.html", form=form)
 
 
 def _get_username():
@@ -34,11 +34,11 @@ def _get_username():
 #     return current_user.username if current_user.is_authenticated else None
 
 
-@main.route("/todolist<int:proteus>/<int:todolist_id>/", methods=["GET", "POST"])
+@main.route("/todolist/<int:todolist_id>/", methods=["GET", "POST"])
 @login_required
-def todolist(proteus, todolist_id):
+def todolist(todolist_id):
     l_todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
-    return render_template("todolist.html", todolist=l_todolist, proteus=random.randint(10000, 90000))
+    return render_template("todolist.html", todolist=l_todolist)
 
 
 @main.route("/todolist/add/", methods=["POST"])
@@ -49,7 +49,7 @@ def add_todolist():
         l_todolist = TodoList(form.title.data, _get_username())  #.save()
         db.session.add(l_todolist)
         db.session.commit()
-        return redirect(url_for("main.todolist", proteus=random.randint(10000, 90000), todolist_id=l_todolist.id))
+        return redirect(url_for("main.todolist", todolist_id=l_todolist.id))
     return redirect(url_for("main.index"))
 
 
@@ -58,7 +58,7 @@ def add_todolist():
 def set_view_filter(todolist_id):
     if current_user and current_user.is_authenticated:
         current_user.b_show_all = not current_user.b_show_all
-    return redirect(url_for("main.todolist", proteus=random.randint(10000, 90000), todolist_id=todolist_id))
+    return redirect(url_for("main.todolist", todolist_id=todolist_id))
 
 
 @main.route("/set_todo_done/<int:todolist_id>/<int:todo_id>/", methods=["GET", "POST"])
@@ -71,7 +71,7 @@ def set_todo_done(todolist_id, todo_id):
     db.session.add(todo)
     db.session.commit()
     # todo.save()
-    return redirect(url_for("main.todolist", proteus=random.randint(10000, 90000), todolist_id=todolist_id, _anchor=todo_id))
+    return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=todo_id))
 
 
 @main.route("/todo_item/<int:todolist_id>/<int:todo_id>/", methods=["GET", "POST"])
@@ -102,7 +102,7 @@ def todo_item(todolist_id, todo_id):
             db.session.commit()
         else:
             db.session.commit()
-        return redirect(url_for("main.todolist", proteus=random.randint(10000, 90000), todolist_id=todolist_id, _anchor=todo_id))
+        return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=todo_id))
     return render_template("todo_item.html", form=form, todo_id=todo_id, todolist_id=todolist_id)
 
 
@@ -121,5 +121,5 @@ def todo_item_new_from_id(todolist_id, from_id):
             assigned_to=form.assigned.data) # .save()
         db.session.add(todo)
         db.session.commit()
-        return redirect(url_for("main.todolist", proteus=random.randint(10000, 90000), todolist_id=todolist_id))
+        return redirect(url_for("main.todolist", todolist_id=todolist_id))
     return render_template("todo_item.html", form=form, todolist_id=todolist_id, _anchor=from_id)

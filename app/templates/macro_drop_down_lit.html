@@ -5,4 +5,8 @@
         <option value="{{ field }}">{{ field }}</option>
     {% endfor %}
     </select>
+    <script>
+    {#$('#id_{{ name }}').onchange = function(){location.replace({{ url_for(url_for('main.todolist', todolist_id=todolist.id, )) }});};#}
+
+    </script>
 {% endmacro %}

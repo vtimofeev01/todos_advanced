@@ -215,7 +215,7 @@ class TodoList(db.Model):
             if not todo.tags:
                 continue
             set_of_tags.update(todo.tags.split())
-        return sorted({capitalize(x.strip()) for x in  set_of_tags})
+        return sorted({capitalize(x.strip()) for x in set_of_tags})
 
     @property
     def get_in_text_tags(self):
@@ -229,19 +229,13 @@ class TodoList(db.Model):
 
     # @property
     def get_assigned_to_list(self, show_all):
-        now = datetime.utcnow()
-        now_l_mid = now - MID_INTERVAL
-        now_l_near = now - NEAR_INTERVAL
         set_of_assigned = set()
         if show_all:
             for todo in self.todos:
                 set_of_assigned.update(todo.assigned.split(','))
         else:
-            for todo in self.todos(or_(or_(
-                    and_(Todo.goal_at is None, Todo.created_at > now_l_mid),
-                    and_(Todo.goal_at is not None, not_(Todo.is_finished))
-            ), and_(Todo.is_finished, Todo.finished_at > now_l_near))):
-                set_of_assigned.update(todo.assigned.split(','))
+            for todo_ in self.todos_actual:
+                set_of_assigned.update(todo_.assigned.split(','))
         return sorted(list({capitalize(x.strip()) for x in set_of_assigned}))
 
 

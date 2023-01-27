@@ -1,12 +1,14 @@
 {% macro render_table(todos, current_user, todolist_id, todo_list ) %}
-{% from "drop_down_lit.html" import drop_down_list %}
+{% from "macro_drop_down_lit.html" import drop_down_list %}
 
     <table>
         <tr>
             <th>id</th>
             <th class="created">От:</th>
-            <th class="description">{{ drop_down_list("Desc.", "description", todo_list.get_used_tags) }}</th>
-            <th class="assigned">{{ drop_down_list("Отв.", "assigned_to", todo_list.get_assigned_to_list(true) ) }} </th>
+{#            <th class="description">{{ drop_down_list("Desc.", "description", todo_list.get_used_tags) }}</th>#}
+            <th class="description">Desc.</th>
+{#            <th class="assigned">{{ drop_down_list("Отв.", "assigned_to", todo_list.get_assigned_to_list(current_user.b_show_all) ) }} </th>#}
+            <th class="assigned">"Отв.</th>
             <th class="goal_at">План:</th>
             <th class="finished_at"> Вып.</th>
         </tr>

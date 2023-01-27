@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 {% from "table_todo.html" import render_table %}
 
-
-{#{% block js %}#}
-{#    <script src="{{ url_for('static', filename='js/todolist.js') }}"></script>#}
-{#{% endblock %}#}
-
 {% block body %}
 
     <section class="header">
@@ -19,5 +14,15 @@
                 {% endif %}
             </div>
         </div>
+    <div>
+        {% for tag in todolist.get_used_tags %}
+            <a href="{{ url_for("main.todolist", todolist_id=todolist.id, tag=tag) }}">{{ tag }}</a>
+        {% endfor %}
+    </div>
+        <div>
+        {% for a_to in todolist.get_assigned_to_list(current_user.b_show_all) %}
+            <a href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to=a_to) }}">{{ a_to }}</a>
+        {% endfor %}
+    </div>
     </section>
 {% endblock %}
