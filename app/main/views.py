@@ -112,24 +112,25 @@ def todo_item(todolist_id, todo_id):
             db.session.commit()
         else:
             db.session.commit()
-        return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=todo_id))
+        return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=todo.tags))
     return render_template("todo_item.html", form=form, todo_id=todo_id, todolist_id=todolist_id)
 
 
 @main.route("/todo_item/<int:todolist_id>/new_from<int:from_id>", methods=["GET", "POST"])
 @login_required
 def todo_item_new_from_id(todolist_id, from_id):
-
+    tags = ""
     todo_from = Todo.query.get(from_id)
     form = TodoEditForm(tags=todo_from.tags if todo_from else "")
     if form.validate_on_submit():
+        tags = form.tags.data.strip()
         todo = Todo(
             description=form.description.data.strip(),
             todolist_id=todolist_id,
             creator=_get_username(),
-            tags=form.tags.data.strip(),
+            tags=tags,
             assigned_to=form.assigned.data) # .save()
         db.session.add(todo)
         db.session.commit()
         return redirect(url_for("main.todolist", todolist_id=todolist_id))
-    return render_template("todo_item.html", form=form, todolist_id=todolist_id, _anchor=from_id)
+    return render_template("todo_item.html", form=form, todolist_id=todolist_id, _anchor=tags)

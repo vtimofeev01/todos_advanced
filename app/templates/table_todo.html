@@ -5,9 +5,7 @@
         <tr>
             <th>id</th>
             <th class="created">От:</th>
-{#            <th class="description">{{ drop_down_list("Desc.", "description", todo_list.get_used_tags) }}</th>#}
             <th class="description">Desc.</th>
-{#            <th class="assigned">{{ drop_down_list("Отв.", "assigned_to", todo_list.get_assigned_to_list(current_user.b_show_all) ) }} </th>#}
             <th class="assigned">"Отв.</th>
             <th class="goal_at">План:</th>
             <th class="finished_at"> Вып.</th>
@@ -15,18 +13,16 @@
         {% for tags, tag_todos in todos | groupby('tags') %}
             <td></td>
             <td class="created"></td>
-            <td class="description">
-                <h6 class="marked"><a
-                        href="{{ url_for('main.todo_item_new_from_id', todolist_id=todolist_id, from_id=tag_todos[0].id) }}">&plus;add </a>{{ tags }}
+            <td class="description" id="{{ tags }}">
+                <h6 class="marked">
+                    <a href="{{ url_for('main.todo_item_new_from_id', todolist_id=todolist_id, from_id=tag_todos[0].id) }}">&plus;add </a>{{ tags }}
                 </h6>
             </td>
             <td class="assigned"></td>
             <td class="goal_at"></td>
             <td class="finished_at"></td>
             {% for todo in tag_todos %}
-
                 <tr class="{{ todo.status }}">
-
                     <td class="id" id="{{ todo.id }}">
                         {% if current_user and current_user.username == todo.creator and todo.editable %}
                             <a href="{{ url_for('main.todo_item',todolist_id=todolist_id, todo_id=todo.id) }}">{{ todo.id }}</a>
@@ -48,10 +44,10 @@
                             <span class="finished_at">{{ todo.f_finished }}</span>
                         {% elif todo.f_goal %}
                             <span class="assigned_to">Отв.{{ todo.assigned }}</span>
-                            <span class="finished_at"><a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
+                            <span class="finished_at">
+                                <a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
                                 &check; </a></span>
                         {% endif %}
-
                     </td>
                     <td class="assigned">{% if todo.assigned %}{{ todo.assigned }}{% endif %}</td>
                     <td class="goal_at {{ todo.goal_state }}">{{ todo.f_goal }}</td>

@@ -10,18 +10,18 @@
                 {{ render_table(todolist_details, current_user=current_user, todolist_id=todolist.id, todo_list=todolist) }}
             </div>
         </div>
-        <div>
+        <div class="tags">
             {% for tag in todolist.get_used_tags %}
-                <a href="{{ url_for("main.todolist", todolist_id=todolist.id, tag=tag) }}">{{ tag }}</a>
+                <a class="b_hrefs" href="{{ url_for("main.todolist", todolist_id=todolist.id, tag=tag) }}">{{ tag }}</a>
             {% endfor %}
         </div>
-        <div>
+        <div class="assigned_tos">
             {% for a_to in todolist.get_assigned_to_list(current_user.b_show_all) %}
-                <a href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to=a_to) }}">{{ a_to }}</a>
+                <a class="b_hrefs" href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to=a_to) }}">{{ a_to }}</a>
             {% endfor %}
         </div>
     <div>
-        <a href="{{ url_for("main.todolist", todolist_id=todolist.id) }}"><h6>ALL</h6></a>
+        <a class="b_hrefs" href="{{ url_for("main.todolist", todolist_id=todolist.id) }}"><h6>ALL</h6></a>
     </div>
     </section>
 {% endblock %}
