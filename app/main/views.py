@@ -3,6 +3,7 @@ from datetime import datetime
 
 from flask import redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import func
 
 from app import parse_text, db
 from app.main import main
@@ -30,15 +31,24 @@ def _get_username():
     return current_user.username if current_user.is_authenticated else None
 
 
-# def _get_user():
-#     return current_user.username if current_user.is_authenticated else None
-
-
 @main.route("/todolist/<int:todolist_id>/", methods=["GET", "POST"])
 @login_required
 def todolist(todolist_id):
+    args = request.args
     l_todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
-    return render_template("todolist.html", todolist=l_todolist)
+    todolist_details = l_todolist.todos_all if current_user.b_show_all else l_todolist.todos_actual
+
+    tag = args.get('tag')
+    if tag:
+        look_for = '%{0}%'.format(tag.lower())
+        todolist_details = todolist_details.filter(func.lower(Todo.tags.like(look_for)))
+
+    assigned_to = args.get('assigned_to')
+    if assigned_to:
+        look_for = '%{0}%'.format(assigned_to.lower())
+        todolist_details = todolist_details.filter(func.lower(Todo.assigned.like(look_for)))
+
+    return render_template("todolist.html", todolist=l_todolist, todolist_details=todolist_details)
 
 
 @main.route("/todolist/add/", methods=["POST"])

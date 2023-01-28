@@ -7,22 +7,21 @@
         <h2 class="title">{{ todolist.title|title }} </h2>
         <div class="row">
             <div class="open-todos">
-                {% if current_user.b_show_all %}
-                    {{ render_table(todolist.todos_all, current_user=current_user, todolist_id=todolist.id, todo_list=todolist) }}
-                {% else %}
-                    {{ render_table(todolist.todos_actual, current_user=current_user, todolist_id=todolist.id, todo_list=todolist) }}
-                {% endif %}
+                {{ render_table(todolist_details, current_user=current_user, todolist_id=todolist.id, todo_list=todolist) }}
             </div>
         </div>
-    <div>
-        {% for tag in todolist.get_used_tags %}
-            <a href="{{ url_for("main.todolist", todolist_id=todolist.id, tag=tag) }}">{{ tag }}</a>
-        {% endfor %}
-    </div>
         <div>
-        {% for a_to in todolist.get_assigned_to_list(current_user.b_show_all) %}
-            <a href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to=a_to) }}">{{ a_to }}</a>
-        {% endfor %}
+            {% for tag in todolist.get_used_tags %}
+                <a href="{{ url_for("main.todolist", todolist_id=todolist.id, tag=tag) }}">{{ tag }}</a>
+            {% endfor %}
+        </div>
+        <div>
+            {% for a_to in todolist.get_assigned_to_list(current_user.b_show_all) %}
+                <a href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to=a_to) }}">{{ a_to }}</a>
+            {% endfor %}
+        </div>
+    <div>
+        <a href="{{ url_for("main.todolist", todolist_id=todolist.id) }}"><h6>ALL</h6></a>
     </div>
     </section>
 {% endblock %}
