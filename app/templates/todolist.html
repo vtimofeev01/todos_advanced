@@ -11,17 +11,23 @@
             </div>
         </div>
         <div class="tags">
-            {% for tag in todolist.get_used_tags %}
-                <a class="b_hrefs" href="{{ url_for("main.todolist", todolist_id=todolist.id, tag=tag) }}">{{ tag }}</a>
+            {% for tags_lists in todolist.get_used_tags_row %}
+                <p>
+                {% for tag in tags_lists %}
+                    <a class="b_hrefs"
+                       href="{{ url_for("main.todolist", todolist_id=todolist.id, tag=tag) }}">{{ tag }}</a>
+                {% endfor %}
+                </p>
             {% endfor %}
         </div>
         <div class="assigned_tos">
             {% for a_to in todolist.get_assigned_to_list(current_user.b_show_all) %}
-                <a class="b_hrefs" href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to=a_to) }}">{{ a_to }}</a>
+                <a class="b_hrefs"
+                   href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to=a_to) }}">{{ a_to }}</a>
             {% endfor %}
         </div>
-    <div>
-        <a class="b_hrefs" href="{{ url_for("main.todolist", todolist_id=todolist.id) }}"><h6>ALL</h6></a>
-    </div>
+        <div>
+            <a class="b_hrefs" href="{{ url_for("main.todolist", todolist_id=todolist.id) }}"><h6>ALL</h6></a>
+        </div>
     </section>
 {% endblock %}

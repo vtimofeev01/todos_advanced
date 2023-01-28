@@ -207,15 +207,27 @@ class TodoList(db.Model):
         return self.todos.order_by(Todo.tags, Todo.id)
 
     @property
-    def get_used_tags(self):
+    def get_used_tags_row(self):
         now = datetime.utcnow()
         a_filter = (Todo.is_finished == False) | (Todo.finished_at > (now - FAR_INTERVAL))
         set_of_tags = set()
+        set_of_first_tags = set()
         for todo in self.todos.filter(a_filter):
             if not todo.tags:
                 continue
-            set_of_tags.update(todo.tags.split())
-        return sorted({capitalize(x.strip()) for x in set_of_tags})
+            t_list = todo.tags.split()
+            l = len(t_list)
+            if l == 1:
+                set_of_first_tags.add(t_list[0])
+            elif l > 1:
+                set_of_first_tags.add(t_list[0])
+                set_of_tags.update(set(t_list[1:]))
+        return [capitalize(x.strip()) for x in sorted(list(set_of_first_tags))], [capitalize(x.strip()) for x in sorted(list(set_of_tags))]
+
+    @property
+    def get_used_tags(self):
+        l1, l2 = self.get_used_tags_row
+        return l1 + l2
 
     @property
     def get_in_text_tags(self):
