@@ -132,5 +132,5 @@ def todo_item_new_from_id(todolist_id, from_id):
             assigned_to=form.assigned.data) # .save()
         db.session.add(todo)
         db.session.commit()
-        return redirect(url_for("main.todolist", todolist_id=todolist_id))
-    return render_template("todo_item.html", form=form, todolist_id=todolist_id, _anchor=tags)
+        return redirect(url_for("main.todolist", todolist_id=todolist_id,  _anchor=tags))
+    return render_template("todo_item.html", form=form, todolist_id=todolist_id)
