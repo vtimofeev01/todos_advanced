@@ -29,7 +29,7 @@ tr td.todolist-title {
     word-break: break-word;
 }
 
-tr.is_info {
+tr.is_open {
     background-color: #f1f8ff;
 }
 

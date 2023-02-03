@@ -13,18 +13,13 @@ login_manager.session_protection = "strong"
 login_manager.login_view = "auth.login"
 
 
-def create_app(config_name):
+def create_main_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     # db.engine.execute("set session wait_timeout = 600;")
 
     db.init_app(app)
-    # migrate.init_app(app, db=db)
-    # with app.app_context():
-    #     db.engine.execute("set session wait_timeout = 600;")
-    #     db.engine.execute("set global max_allowed_packet=268435456;")
-    #     db.engine.execute("set global net_read_timeout = 1000; ")
     login_manager.init_app(app)
 
     from .main import main as main_blueprint
