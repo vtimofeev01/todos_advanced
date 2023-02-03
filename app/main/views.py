@@ -81,7 +81,7 @@ def set_todo_done(todolist_id, todo_id):
     db.session.add(todo)
     db.session.commit()
     # todo.save()
-    return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=todo_id))
+    return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=todo.tags))
 
 
 @main.route("/todo_item/<int:todolist_id>/<int:todo_id>/", methods=["GET", "POST"])
