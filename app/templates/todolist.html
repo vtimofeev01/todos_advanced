@@ -11,7 +11,7 @@
             </div>
         </div>
         <div class="tags">
-            {% for tags_lists in todolist.get_used_tags_row %}
+            {% for tags_lists in todolist.get_used_tags_row(current_user.b_show_all) %}
                 <p>
                 {% for tag in tags_lists %}
                     <a class="b_hrefs"

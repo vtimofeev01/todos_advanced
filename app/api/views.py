@@ -1,5 +1,5 @@
 from flask import abort, request, url_for, jsonify
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from app.api import api
 from app.decorators import admin_required
@@ -206,7 +206,7 @@ from app.models import Todo, TodoList, User
 @login_required
 def used_get_tags(todolist_id):
     todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
-    res = {"tags": [x for x in todolist.get_used_tags]}
+    res = {"tags": [x for x in todolist.get_used_tags(current_user.b_show_all)]}
     return res
 
 @api.route("/used_in_text_tags/<int:todolist_id>")

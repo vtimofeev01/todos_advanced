@@ -206,8 +206,20 @@ class TodoList(db.Model):
     def todos_all(self):
         return self.todos.order_by(Todo.tags, Todo.id)
 
+    def get_used_tags_row(self, show_all):
+        set_of_tags = set()
+        set_of_first_tags = set()
+        for todo in self.todos_all if show_all else self.todos_actual:
+            if not todo.tags:
+                continue
+            t_list = todo.tags.split()
+            set_of_first_tags.add(t_list[0].lower())
+            if len(t_list) > 1:
+                set_of_tags.update(set([x.lower() for x in t_list[1:]]))
+        return [capitalize(x.strip()) for x in sorted(list(set_of_first_tags))], [capitalize(x.strip()) for x in sorted(list(set_of_tags))]
+
     @property
-    def get_used_tags_row(self):
+    def get_used_tags_row_to_erase(self):
         now = datetime.utcnow()
         a_filter = (Todo.is_finished == False) | (Todo.finished_at > (now - FAR_INTERVAL))
         set_of_tags = set()
@@ -224,9 +236,9 @@ class TodoList(db.Model):
                 set_of_tags.update(set(t_list[1:]))
         return [capitalize(x.strip()) for x in sorted(list(set_of_first_tags))], [capitalize(x.strip()) for x in sorted(list(set_of_tags))]
 
-    @property
-    def get_used_tags(self):
-        l1, l2 = self.get_used_tags_row
+
+    def get_used_tags(self, show_all):
+        l1, l2 = self.get_used_tags_row(show_all)
         return l1 + l2
 
     @property
@@ -248,7 +260,7 @@ class TodoList(db.Model):
         else:
             for todo_ in self.todos_actual:
                 set_of_assigned.update(todo_.assigned.split(','))
-        return sorted(list({capitalize(x.strip()) for x in set_of_assigned}))
+        return sorted(list(set(capitalize(x.strip()) for x in set_of_assigned)))
 
 
 class Todo(db.Model):
