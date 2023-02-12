@@ -1,0 +1,55 @@
+{% macro render_table(todos, current_user, todolist_id, todo_list ) %}
+    {% from "macro_drop_down_lit.html" import drop_down_list %}
+
+    <table>
+        <tr>
+            <th class="created">Описание</th>
+        </tr>
+        {% for tags, tag_todos in todos | groupby('tags') %}
+            <td class="description" id="{{ tags }}">
+                <h6 class="marked">
+                    <a href="{{ url_for('main.todo_item_new_from_id', todolist_id=todolist_id, from_id=tag_todos[0].id) }}">&plus;add </a>{{ tags }}
+                </h6>
+            </td>
+            {% for todo in tag_todos %}
+                <tr class="{{ todo.status }}"> (
+                    <td class="id" id="{{ todo.id }}">
+                        {% if current_user and current_user.username == todo.creator and todo.editable %}
+                            <a href="{{ url_for('main.todo_item',todolist_id=todolist_id, todo_id=todo.id) }}">{{ todo.id }}</a>
+                        {% else %}
+                            {{ todo.id }}
+                        {% endif %},
+                        {{ todo.f_created }})
+                        <span>{{ todo.description | safe }}</span>
+                        <span class="assigned_to"> Отв.{{ todo.assigned }}</span>
+                        {% if todo.is_finished and todo.editable %}
+                            <span class="finished_at"><a
+                                    href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
+                                {{ todo.f_finished }} </a></span>
+                        {% elif todo.is_finished %}
+                            <span class="finished_at">{{ todo.f_finished }}</span>
+                        {% elif todo.f_goal %}
+                            <span class="finished_at">
+                                <a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
+                                &check; </a></span>
+                        {% endif %}
+                        <span class="goal_at {{ todo.goal_state }}">{{ todo.f_goal }}</span>
+                        <span class="finished_at">
+                        {% if not todo.f_goal %}
+                            &#9432;
+                        {% elif todo.is_finished and todo.editable %}
+                            <a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">
+                                {{ todo.f_finished }} </a>
+                        {% elif todo.is_finished %} {{ todo.f_finished }}
+                        {% elif todo.f_goal %}
+                            <a href="{{ url_for('main.set_todo_done',todolist_id=todolist_id, todo_id=todo.id) }}">&check; </a>
+                        {% endif %}
+                    </span>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+
+
+    </table>
+{% endmacro %}

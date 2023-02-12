@@ -1,7 +1,7 @@
 
 .tags, .assigned_tos {
     padding: 0.5em;
-        }
+}
 
 .b_hrefs {
     text-decoration: none;
@@ -64,6 +64,7 @@ p.cell_view {
 span.finished_at {
     display: inline;
     font-weight: bold;
+    alignment: right;
 }
 
 span.assigned_to {
@@ -72,9 +73,9 @@ span.assigned_to {
 }
 
 
-.description {
-    max-width: 1000px;
-}
+/*.description {*/
+/*    max-width: 1000px;*/
+/*}*/
 
 .finished-todos li {
     color: #aaa;
@@ -135,6 +136,7 @@ h6.marked {
     color: rgb(0, 4, 72);
     font-weight: bold;
     margin-top: 0.5rem;
+    margin-left: 6rem;
     margin-bottom: 0;
 }
 
@@ -142,17 +144,17 @@ span.marked:hover {
     background-color: lightyellow;
 }
 
-td.is_outdated {
+span.is_outdated {
     color: rgb(169, 10, 104);
     font-weight: bold;
 }
 
-.is_near {
+span.is_near {
     color: rgb(53, 154, 0);
     font-weight: bold;
 }
 
-.is_next_day {
+span.is_next_day {
     color: rgb(0, 91, 51);
     font-weight: bolder;
 }
@@ -261,6 +263,16 @@ input:checked + .slider:before {
     padding: 0 5px;
 }
 
+td.description {
+    position:relative;
+}
+
+div.dates {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
 /* Larger than phone */
 @media (min-width: 550px) {
     .header {
@@ -290,13 +302,11 @@ input:checked + .slider:before {
         display: table-cell;
     }
 
+
     p.cell_view {
         display: none;
     }
 
-    span.finished_at {
-        display: none;
-    }
 }
 
 
@@ -474,10 +484,6 @@ input:checked + .slider:before {
     }
 
     p.cell_view {
-        display: none;
-    }
-
-    span.assigned_to {
         display: none;
     }
 
