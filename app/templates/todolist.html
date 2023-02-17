@@ -10,26 +10,41 @@
                 {{ render_table(todolist_details, current_user=current_user, todolist_id=todolist.id, todo_list=todolist) }}
             </div>
         </div>
+
         <div class="tags">
-            {% for tags_lists in todolist.get_used_tags_row(current_user.b_show_all) %}
+            {% for tags_lists in todolist.get_used_tags_row_advances(current_user.b_show_all,session['tag']) %}
                 <p>
-                    {% for tag in tags_lists %}
-                        <a class="b_hrefs"
-                           href="{{ url_for("main.todolist", todolist_id=todolist.id, tag=tag) }}">{{ tag }}</a>
+                    {% for tag, weight in tags_lists %}
+                        {% if weight == 0 %}
+                            <a class="b_hrefs"
+                               href="{{ url_for("main.todolist", todolist_id=todolist.id, tag=tag) }}">{{ tag }}</a>
+                        {% else %}
+                            <a class="b_hrefs"
+                               href="{{ url_for("main.todolist", todolist_id=todolist.id, tag=tag) }}">
+                                <strong>{{ tag }}</strong></a>
+                        {% endif %}
                     {% endfor %}
-                    <a class="b_hrefs"
-                       href="{{ url_for("main.todolist", todolist_id=todolist.id, tag='None') }}">All</a>
                 </p>
             {% endfor %}
+            <a class="b_hrefs"
+               href="{{ url_for("main.todolist", todolist_id=todolist.id, tag='None') }}">All</a>
         </div>
+
         <div class="assigned_tos">
-            {% for a_to in todolist.get_assigned_to_list(current_user.b_show_all) %}
-                <a class="b_hrefs"
-                   href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to=a_to) }}">{{ a_to }}</a>
+            {% for a_to, weight in todolist.get_assigned_to_list_advanced(current_user.b_show_all,session['tag']) %}
+                {% if weight == 0 %}
+                    <a class="b_hrefs" href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to=a_to) }}">
+                        {{ a_to }}</a>
+                {% else %}
+                    <a class="b_hrefs" href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to=a_to) }}">
+                        <strong>{{ a_to }}</strong></a>
+                {% endif %}
             {% endfor %}
             <a class="b_hrefs"
                href="{{ url_for("main.todolist", todolist_id=todolist.id, assigned_to='None') }}">All</a>
         </div>
+
+
         <div>
             <a class="b_hrefs"
                href="{{ url_for("main.todolist", todolist_id=todolist.id,tag='None', assigned_to='None') }}"><h6>

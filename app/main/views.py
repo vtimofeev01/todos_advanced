@@ -36,7 +36,7 @@ def _get_username():
 def todolist(todolist_id):
     args = request.args
     l_todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
-    todolist_details = l_todolist.todos_all if current_user.b_show_all else l_todolist.todos_actual
+    todolist_details = l_todolist.todos_list(current_user.b_show_all)
 
     tag = args.get('tag')
     if tag == 'None':

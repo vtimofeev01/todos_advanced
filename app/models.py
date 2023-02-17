@@ -155,26 +155,6 @@ class TodoList(db.Model):
     title = synonym("_title", descriptor=title)
 
     @property
-    def todos_url(self):
-        url = None
-        kwargs = dict(todolist_id=self.id, _external=True)
-        if self.creator:
-            kwargs["username"] = self.creator
-            url = "api.get_user_todolist_todos"
-        return url_for(url or "api.get_todolist_todos", **kwargs)
-
-    def to_dict(self):
-        return {
-            "title": self.title,
-            "creator": self.creator,
-            "created_at": self.created_at,
-            "total_todo_count": self.todo_count,
-            "open_todo_count": self.open_count,
-            "finished_todo_count": self.finished_count,
-            "todos": self.todos_url,
-        }
-
-    @property
     def todo_count(self):
         return self.todos.order_by(None).count()
 
@@ -206,6 +186,12 @@ class TodoList(db.Model):
     def todos_all(self):
         return self.todos.order_by(Todo.tags, Todo.id)
 
+    def todos_list(self, v):
+        if v:
+            return self.todos_all
+        else:
+            return self.todos_actual
+
     def get_used_tags_row(self, show_all):
         set_of_tags = set()
         set_of_first_tags = set()
@@ -216,26 +202,30 @@ class TodoList(db.Model):
             set_of_first_tags.add(t_list[0].lower())
             if len(t_list) > 1:
                 set_of_tags.update(set([x.lower() for x in t_list[1:]]))
-        return [capitalize(x.strip()) for x in sorted(list(set_of_first_tags))], [capitalize(x.strip()) for x in sorted(list(set_of_tags))]
+        return [capitalize(x.strip()) for x in sorted(list(set_of_first_tags))], [capitalize(x.strip()) for x in
+                                                                                  sorted(list(set_of_tags))]
 
-    @property
-    def get_used_tags_row_to_erase(self):
-        now = datetime.utcnow()
-        a_filter = (Todo.is_finished == False) | (Todo.finished_at > (now - FAR_INTERVAL))
-        set_of_tags = set()
-        set_of_first_tags = set()
-        for todo in self.todos.filter(a_filter):
+    def get_used_tags_row_advances(self, show_all, tag=None):
+        dict_of_tags = {}
+        dict_of_first_tags = {}
+        tag2 = tag.lower().strip() if tag else None
+        for todo in self.todos_list(show_all):
             if not todo.tags:
                 continue
-            t_list = todo.tags.split()
-            l = len(t_list)
-            if l == 1:
-                set_of_first_tags.add(t_list[0])
-            elif l > 1:
-                set_of_first_tags.add(t_list[0])
-                set_of_tags.update(set(t_list[1:]))
-        return [capitalize(x.strip()) for x in sorted(list(set_of_first_tags))], [capitalize(x.strip()) for x in sorted(list(set_of_tags))]
-
+            t_list = [x.lower().strip() for x in todo.tags.split()]
+            present = 1 if tag is not None and tag2 in t_list else 0
+            if t_list[0] not in dict_of_first_tags:
+                dict_of_first_tags[t_list[0]] = present
+            elif dict_of_first_tags[t_list[0]] == 0:
+                dict_of_first_tags[t_list[0]] = present
+            if len(t_list) > 1:
+                for t_tag in t_list[1:]:
+                    if t_tag not in dict_of_tags:
+                        dict_of_tags[t_tag] = present
+                    elif dict_of_tags[t_tag] == 0:
+                        dict_of_tags[t_tag] = present
+        return [(capitalize(a), dict_of_first_tags[a]) for a in sorted(dict_of_first_tags.keys())], \
+            [(capitalize(a), dict_of_tags[a]) for a in sorted(dict_of_tags.keys())]
 
     def get_used_tags(self, show_all):
         l1, l2 = self.get_used_tags_row(show_all)
@@ -254,13 +244,23 @@ class TodoList(db.Model):
     # @property
     def get_assigned_to_list(self, show_all):
         set_of_assigned = set()
-        if show_all:
-            for todo in self.todos:
-                set_of_assigned.update(todo.assigned.split(','))
-        else:
-            for todo_ in self.todos_actual:
-                set_of_assigned.update(todo_.assigned.split(','))
+        for todo in self.todos_list(show_all):
+            set_of_assigned.update(todo.assigned.split(','))
         return sorted(list(set(capitalize(x.strip()) for x in set_of_assigned)))
+
+    def get_assigned_to_list_advanced(self, show_all, tag=None):
+        dict_of_assigned = {}
+        tag2 = tag.lower().strip() if tag else None
+        for todo in self.todos_list(show_all):
+            present = 0 if tag2 is None or tag2 not in todo.tags.lower() else 1
+            for assigned in todo.assigned.split(','):
+                assigned2 = assigned.lower().strip()
+                if assigned2 not in dict_of_assigned:
+                    dict_of_assigned[assigned2] = present
+                elif dict_of_assigned[assigned2] == 0:
+                    dict_of_assigned[assigned2] = present
+
+        return [(capitalize(a), dict_of_assigned[a]) for a in sorted(dict_of_assigned.keys())]
 
 
 class Todo(db.Model):
@@ -327,12 +327,6 @@ class Todo(db.Model):
         return self.created_at.strftime(DATE_FORMAT)
 
     @property
-    def f_tags(self):
-        if self.tags is None:
-            return ""
-        return ';'.join(self.tags.split('##'))
-
-    @property
     def goal_state(self):
         now = datetime.utcnow()
         goal = LAST_DATE if self.goal_at is None else self.goal_at + timedelta(days=1)
@@ -347,38 +341,3 @@ class Todo(db.Model):
         elif goal < now + NEAR_INTERVAL:
             return 'is_near'
         return ''
-
-    @property
-    def editable(self):
-        limit = datetime.utcnow() - NEAR_INTERVAL
-        if not self.is_finished or self.finished_at is None:
-            return True
-        if self.created_at >= limit:
-            return True
-        if self.goal_at is not None and self.goal_at >= limit:
-            return True
-        if self.finished_at is not None and self.finished_at >= limit:
-            return True
-        return False
-
-    def finished(self):
-        self.is_finished = True
-        self.finished_at = datetime.utcnow()
-        self.save()
-
-    def reopen(self):
-        self.is_finished = False
-        self.finished_at = None
-        self.save()
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "tags": self.tags,
-            "description": self.description,
-            "creator": self.creator,
-            "created_at": self.created_at,
-            "finished_at": self.finished_at,
-            "goal": self.goal_at,
-            "status": self.status,
-        }
