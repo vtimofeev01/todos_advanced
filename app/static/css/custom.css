@@ -30,7 +30,7 @@ tr td.todolist-title {
 }
 
 tr.is_open {
-    background-color: #f1f8ff;
+    background-color: #e4f4ff;
 }
 
 tr.is_finished {
@@ -40,6 +40,11 @@ tr.is_finished {
 tr.is_outdated {
     background-color: #ffeeee;
 }
+
+tr.is_info {
+    background-color: rgba(0, 255, 140, 0.02);
+}
+
 
 td {
     padding: 3px 7px;
