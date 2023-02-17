@@ -101,8 +101,7 @@ def set_todo_done(todolist_id, todo_id):
 @main.route("/todo_item/<int:todolist_id>/<int:todo_id>/", methods=["GET", "POST"])
 @login_required
 def todo_item(todolist_id, todo_id):
-
-    # todo = Todo.query.get_or_404(todo_id)
+    l_todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
     todo = db.session.get(Todo, todo_id)
     form = TodoEditForm(tags=todo.tags,
                         description=todo.description,
@@ -127,13 +126,14 @@ def todo_item(todolist_id, todo_id):
         else:
             db.session.commit()
         return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=todo.tags))
-    return render_template("todo_item.html", form=form, todo_id=todo_id, todolist_id=todolist_id)
+    return render_template("todo_item.html", form=form, todo_id=todo_id, todolist_id=todolist_id, todolist=l_todolist)
 
 
 @main.route("/todo_item/<int:todolist_id>/new_from<int:from_id>", methods=["GET", "POST"])
 @login_required
 def todo_item_new_from_id(todolist_id, from_id):
     tags = ""
+    l_todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
     todo_from = Todo.query.get(from_id)
     form = TodoEditForm(tags=todo_from.tags if todo_from else "")
     if form.validate_on_submit():
@@ -147,4 +147,4 @@ def todo_item_new_from_id(todolist_id, from_id):
         db.session.add(todo)
         db.session.commit()
         return redirect(url_for("main.todolist", todolist_id=todolist_id,  _anchor=tags))
-    return render_template("todo_item.html", form=form, todolist_id=todolist_id)
+    return render_template("todo_item.html", form=form, todolist_id=todolist_id, todolist=l_todolist)

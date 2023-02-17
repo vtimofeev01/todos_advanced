@@ -263,7 +263,7 @@ input:checked + .slider:before {
     vertical-align: middle;
 }
 
-.add_tag, .add_text_tag {
+.add_tag, .add_text_tag, .add_assigned {
     cursor: grab;
     padding: 0 5px;
 }

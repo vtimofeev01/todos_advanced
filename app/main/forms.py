@@ -8,7 +8,7 @@ class TodoEditForm(FlaskForm):
                          render_kw={"placeholder": "Enter your tags"})
     description = HiddenField("Enter your todo", validators=[InputRequired(), Length(0, 2000)],
                                 render_kw={"placeholder": "Enter your task"})
-    assigned = StringField("Assigned to", validators=[InputRequired(), Length(1, 64)],
+    assigned = TextAreaField("Assigned to", validators=[InputRequired(), Length(1, 64)],
                            render_kw={"placeholder": "Assigned to"})
     is_finished = BooleanField("finished")
     finished_at = DateField('Which date is your favorite?')

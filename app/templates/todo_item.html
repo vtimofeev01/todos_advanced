@@ -16,12 +16,6 @@
         </style>
         {% if current_user %} {{ current_user._username }} {% endif %}
 
-        {#        {% if  todo_id %}#}
-        {#            <h2 class="title">{{ current_user._username }} Edits #{{ todo_id }}</h2>#}
-        {#        {% else %}#}
-        {#            <h2 class="title">{{ current_user._username }} adds new item</h2>#}
-        {#        {% endif %}#}
-
         {% if  todo_id %}
             <h2 class="title"> Event #{{ todo_id }}</h2>
         {% else %}
@@ -29,41 +23,62 @@
         {% endif %}
 
         <div class="row">
-            <div class="three columns value-prop"></div>
-            <div class="six columns">
-                {% if form.errors %}
-                    <div class="has-error"><strong>ERROR</strong></div>
-                {% endif %}
-                <form method=post id="form">
-                    {{ form.hidden_tag() }}
-                    <dl>
-                        {{ render_field(form.tags,  class_="u-full-width", maxlength=1000) }}
-                        <p id="p_tags_list"></p>
-                        <div class="u-full-width" id="standalone-container">
-                            <div id="toolbar-container">
-                                <button class="ql-bold"></button>
-                                <button class="ql-list" value="ordered"></button>
-                                <button class="ql-list" value="bullet"></button>
-                                <button class="ql-indent" value="-1"></button>
-                                <button class="ql-indent" value="+1"></button>
-                                <button class="ql-link"></button>
-                                <button class="ql-clean"></button>
-                            </div>
-                            <div id="editor-container"></div>
+            {#            <div>#}
+            {% if form.errors %}
+                <div class="has-error"><strong>ERROR</strong></div>
+            {% endif %}
+            <form method=post id="form">
+                {{ form.hidden_tag() }}
+                <dl>
+                    {{ render_field(form.tags,  class_="u-full-width", maxlength=1000) }}
+                    {% for tags_lists in todolist.get_used_tags_row_advances(current_user.b_show_all,session['tag']) %}
+                        <p>
+                            {% for tag, weight in tags_lists %}
+                                {% if weight == 0 %}
+                                    <a class='add_tag'>{{ tag }}</a>
+                                {% else %}
+                                    <a class='add_tag'> <strong>{{ tag }}</strong></a>
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    {% endfor %}
+
+                    <div class="u-full-width" id="standalone-container">
+                        <div id="toolbar-container">
+                            <button class="ql-bold"></button>
+                            <button class="ql-list" value="ordered"></button>
+                            <button class="ql-list" value="bullet"></button>
+                            <button class="ql-indent" value="-1"></button>
+                            <button class="ql-indent" value="+1"></button>
+                            <button class="ql-link"></button>
+                            <button class="ql-clean"></button>
                         </div>
-                        <p id="p_in_text_list"></p>
-                        {{ render_field(form.assigned,  class_="u-full-width", maxlength=64) }}
-                        {% if todo_id %}
-                            {{ render_field(form.is_finished,  class_="u-full-width") }}
-                            {% if form.is_finished.data %}
-                                {{ render_field(form.finished_at,  class_="u-full-width") }}
+                        <div id="editor-container"></div>
+                    </div>
+                    <p id="p_in_text_list"></p>
+                    {{ render_field(form.assigned,  class_="u-full-width", maxlength=64) }}
+                    <p>
+                        {% for a_to, weight in todolist.get_assigned_to_list_advanced(current_user.b_show_all,session['tag']) %}
+                            {% if weight == 0 %}
+                                <a class="add_assigned"> {{ a_to }}</a>
+                            {% else %}
+                                <a class="add_assigned"> <strong>{{ a_to }}</strong></a>
                             {% endif %}
+                        {% endfor %}
+                    </p>
+
+
+                    {% if todo_id %}
+                        {{ render_field(form.is_finished,  class_="u-full-width") }}
+                        {% if form.is_finished.data %}
+                            {{ render_field(form.finished_at,  class_="u-full-width") }}
                         {% endif %}
-                        {{ render_field(form.submit) }}
-                    </dl>
-                </form>
-            </div>
+                    {% endif %}
+                    {{ render_field(form.submit) }}
+                </dl>
+            </form>
         </div>
+        {#        </div>#}
 
 
         <script>
@@ -80,21 +95,17 @@
         <script>
 
             function appendToId(myVariable, elem_id, before = "", after = "") {
-                if (document.getElementById(elem_id).innerHTML.search(myVariable) === -1) {
-                    document.getElementById(elem_id).innerHTML += before + myVariable + after;
+                let nbar = myVariable;
+                nbar = nbar.replace(/<[^>]*>/g, "");
+                if (document.getElementById(elem_id).innerHTML.search(nbar) === -1) {
+                    document.getElementById(elem_id).innerHTML += before + nbar + after;
                 }
             }
 
             async function displayWord() {
-                let apiURL = "{{url_for('api.used_get_tags', todolist_id=todolist_id)}}"
-                let apiURL2 = "{{url_for('api.used_in_text_tags', todolist_id=todolist_id)}}"
+
                 try {
-                    let appArr = await fetch(apiURL).then(res => res.json());
-                    let tags_list = "";
-                    appArr.tags.forEach((item) => {
-                        tags_list += "<a class='add_tag'>" + item + "</a>  ";
-                    })
-                    document.getElementById("p_tags_list").innerHTML = tags_list;
+
                     $(".add_tag").bind('click', function (event) {
                         appendToId(this.innerHTML, "tags", " ")
                     })
@@ -103,14 +114,9 @@
                 }
 
                 try {
-                    let appArr = await fetch(apiURL2).then(res => res.json());
-                    let tags_list = "";
-                    appArr.tags.forEach((item) => {
-                        tags_list += "<a class='add_text_tag'>" + item + "</a>  ";
-                    })
-                    document.getElementById("p_in_text_list").innerHTML = tags_list;
-                    $(".add_text_tag").bind('click', function (event) {
-                        appendToId(this.innerHTML, "description", "[", "]")
+                    $(".add_assigned").bind('click', function (event) {
+                        appendToId(this.innerHTML, "assigned", ",")
+                        console.log('zzzz')
                     })
                 } catch (err) {
                     console.error(err)
@@ -122,9 +128,6 @@
 
 
         <script>
-            {#// When the submit button is pressed, retrieve several pieces of info#}
-            {#// from the QuillJS API (https://quilljs.com/docs/api/#content), copy#}
-            {#// them into to WTForms hidden fields, and submit the form#}
             let descr_area = document.getElementById('description');
             let submit_entry = function () {
                 descr_area.value = quill.root.innerHTML;
