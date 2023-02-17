@@ -1,7 +1,7 @@
 import random
 from datetime import datetime
 
-from flask import redirect, render_template, request, url_for
+from flask import redirect, render_template, request, url_for, session
 from flask_login import current_user, login_required
 from sqlalchemy import func
 
@@ -39,12 +39,26 @@ def todolist(todolist_id):
     todolist_details = l_todolist.todos_all if current_user.b_show_all else l_todolist.todos_actual
 
     tag = args.get('tag')
+    if tag == 'None':
+        session['tag'] = None
+        tag = None
+    if tag is None and session.get('tag', None) is not None:
+        tag = session['tag']
+
     if tag:
+        session['tag'] = tag
         look_for = '%{0}%'.format(tag.lower())
         todolist_details = todolist_details.filter(func.lower(Todo.tags.like(look_for)))
 
     assigned_to = args.get('assigned_to')
+    if assigned_to == 'None':
+        session['assigned_to'] = None
+        assigned_to = None
+    if assigned_to is None and session.get('assigned_to', None) is not None:
+        assigned_to = session['assigned_to']
+
     if assigned_to:
+        session['assigned_to'] = assigned_to
         look_for = '%{0}%'.format(assigned_to.lower())
         todolist_details = todolist_details.filter(func.lower(Todo.assigned.like(look_for)))
 
