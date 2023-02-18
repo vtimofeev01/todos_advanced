@@ -97,12 +97,16 @@
             function appendToId(myVariable, elem_id, before = "", after = "") {
                 let nbar = myVariable;
                 nbar = nbar.replace(/<[^>]*>/g, "");
-                if (document.getElementById(elem_id).innerHTML.search(nbar) === -1) {
+                let elem_by_id = document.getElementById(elem_id);
+                if (elem_by_id.innerHTML.length === 0) {
+                    elem_by_id.innerHTML += nbar + after;
+                }
+                else if (document.getElementById(elem_id).innerHTML.search(nbar) === -1) {
                     document.getElementById(elem_id).innerHTML += before + nbar + after;
                 }
             }
 
-            async function displayWord() {
+            function displayWord() {
 
                 try {
 
