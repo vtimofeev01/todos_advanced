@@ -11,7 +11,9 @@ from app.main.forms import TodoListForm, TodoEditForm
 from app.models import Todo, TodoList
 from app.parse_text import msg_mark
 
-
+S_TODOLIST = 'todolist'
+S_TAG = 'tag'
+S_ASSIGNED = 'assigned_to'
 @main.route("/")
 def index():
     # return render_template("index.html", form=form)
@@ -38,33 +40,43 @@ def todolist(todolist_id):
     l_todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
     todolist_details = l_todolist.todos_list(current_user.b_show_all)
 
-    tag = args.get('tag')
+    if S_TODOLIST not in session:
+        session[S_TODOLIST] = todolist_id
+    elif session[S_TODOLIST] != todolist_id:
+        if S_TAG in session:
+            del session[S_TAG]
+        if S_ASSIGNED in session:
+            del session[S_ASSIGNED]
+        session[S_TODOLIST] = todolist_id
+
+
+    tag = args.get(S_TAG)
     if tag == 'None':
-        if 'tag' in session:
-            del session['tag']
+        if S_TAG in session:
+            del session[S_TAG]
         tag = None
-    if tag is None and session.get('tag', None) is not None:
-        tag = session['tag']
+    if tag is None and session.get(S_TAG, None) is not None:
+        tag = session[S_TAG]
 
     if tag:
-        session['tag'] = tag
+        session[S_TAG] = tag
         look_for = '%{0}%'.format(tag.lower())
         todolist_details = todolist_details.filter(func.lower(Todo.tags.like(look_for)))
 
-    assigned_to = args.get('assigned_to')
+    assigned_to = args.get(S_ASSIGNED)
     if assigned_to == 'None':
-        if 'assigned_to' in session:
-            del session['assigned_to']
+        if S_ASSIGNED in session:
+            del session[S_ASSIGNED]
         assigned_to = None
-    if assigned_to is None and session.get('assigned_to', None) is not None:
-        assigned_to = session['assigned_to']
+    if assigned_to is None and session.get(S_ASSIGNED, None) is not None:
+        assigned_to = session[S_ASSIGNED]
 
     if assigned_to:
-        session['assigned_to'] = assigned_to
+        session[S_ASSIGNED] = assigned_to
         look_for = '%{0}%'.format(assigned_to.lower())
         todolist_details = todolist_details.filter(func.lower(Todo.assigned.like(look_for)))
 
-    header_keys = ('tag', 'assigned_to')
+    header_keys = (S_TAG, S_ASSIGNED)
     filter_reader = []
     for hk in header_keys:
         if hk in session and session[hk] is not None:
@@ -122,7 +134,22 @@ def todo_item(todolist_id, todo_id):
 
         form.populate_obj(todo)
         todo.description = msg_mark(todo.description).strip()
-        todo.tags = todo.tags.strip()
+        # todo.tags = todo.tags.strip()
+        tags_list = [x.strip() for x in form.tags.data.split()]
+        tags = ' '.join(tags_list)
+        ## check if tags are right
+        tags_set = set(tags_list)
+        # print(tags,tags_set)
+        for rec in l_todolist.todos_all:
+            rs_tag = set(rec.tags.split())
+            # print(rs_tag, tags_set, rs_tag == tags_set)
+            if rs_tag == tags_set:
+                todo.tags = rec.tags
+                # print('found')
+                break
+
+
+
         if todo.is_finished and todo.finished_at is None:
             todo.finished_at = datetime.utcnow()
         args = parse_text.msg_parse(form.description.data)
@@ -142,12 +169,24 @@ def todo_item(todolist_id, todo_id):
 @main.route("/todo_item/<int:todolist_id>/new_from<int:from_id>", methods=["GET", "POST"])
 @login_required
 def todo_item_new_from_id(todolist_id, from_id):
-    tags = ""
+
     l_todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
     todo_from = Todo.query.get(from_id)
     form = TodoEditForm(tags=todo_from.tags if todo_from else "")
     if form.validate_on_submit():
-        tags = form.tags.data.strip()
+        tags_list = [x.strip() for x in form.tags.data.split()]
+        tags = ' '.join(tags_list)
+        ## check if tags are right
+        tags_set = set(tags_list)
+        # print(tags,tags_set)
+        for rec in l_todolist.todos_all:
+            rs_tag = set(rec.tags.split())
+            # print(rs_tag, tags_set, rs_tag == tags_set)
+            if rs_tag == tags_set:
+                tags = rec.tags
+                # print('found')
+                break
+
         todo = Todo(
             description=form.description.data.strip(),
             todolist_id=todolist_id,
