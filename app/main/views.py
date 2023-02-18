@@ -40,7 +40,8 @@ def todolist(todolist_id):
 
     tag = args.get('tag')
     if tag == 'None':
-        session['tag'] = None
+        if 'tag' in session:
+            del session['tag']
         tag = None
     if tag is None and session.get('tag', None) is not None:
         tag = session['tag']
@@ -52,7 +53,8 @@ def todolist(todolist_id):
 
     assigned_to = args.get('assigned_to')
     if assigned_to == 'None':
-        session['assigned_to'] = None
+        if 'assigned_to' in session:
+            del session['assigned_to']
         assigned_to = None
     if assigned_to is None and session.get('assigned_to', None) is not None:
         assigned_to = session['assigned_to']
@@ -62,7 +64,15 @@ def todolist(todolist_id):
         look_for = '%{0}%'.format(assigned_to.lower())
         todolist_details = todolist_details.filter(func.lower(Todo.assigned.like(look_for)))
 
-    return render_template("todolist.html", todolist=l_todolist, todolist_details=todolist_details)
+    header_keys = ('tag', 'assigned_to')
+    filter_reader = []
+    for hk in header_keys:
+        if hk in session and session[hk] is not None:
+            filter_reader.append("+" + session[hk])
+    filter_header = ', '.join(filter_reader) if filter_reader else None
+
+    return render_template("todolist.html", todolist=l_todolist, todolist_details=todolist_details,
+                           filter_header=filter_header)
 
 
 @main.route("/todolist/add/", methods=["POST"])

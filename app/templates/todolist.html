@@ -5,6 +5,9 @@
 
     <section class="header">
         <h2 class="title">{{ todolist.title|title }} </h2>
+    {% if filter_header %}
+        <h6>выбрано: {{ filter_header }}</h6>
+    {% endif %}
         <div class="row">
             <div class="open-todos">
                 {{ render_table(todolist_details, current_user=current_user, todolist_id=todolist.id, todo_list=todolist) }}
