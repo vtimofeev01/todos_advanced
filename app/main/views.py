@@ -9,7 +9,7 @@ from app import parse_text, db
 from app.main import main
 from app.main.forms import TodoListForm, TodoEditForm
 from app.models import Todo, TodoList
-from app.parse_text import msg_mark
+from app.parse_text import msg_mark, tags_list_normalizer, remove_single_p_tag
 
 S_TODOLIST = 'todolist'
 S_TAG = 'tag'
@@ -138,9 +138,8 @@ def todo_item(todolist_id, todo_id):
     if form.validate_on_submit():
 
         form.populate_obj(todo)
-        todo.description = msg_mark(todo.description).strip()
-        # todo.tags = todo.tags.strip()
-        tags_list = [x.strip() for x in form.tags.data.split()]
+        todo.description = remove_single_p_tag(msg_mark(todo.description).strip())
+        tags_list = tags_list_normalizer(form.tags.data)
         tags = ' '.join(tags_list)
         ## check if tags are right
         tags_set = set(tags_list)
@@ -149,8 +148,7 @@ def todo_item(todolist_id, todo_id):
             rs_tag = set(rec.tags.split())
             # print(rs_tag, tags_set, rs_tag == tags_set)
             if rs_tag == tags_set:
-                # tags = rec.tags
-                tags = ' '.join([x.strip() for x in rec.tags.split()])
+                tags = ' '.join(tags_list_normalizer(rec.tags))
                 # print('found')
                 break
 
@@ -180,21 +178,19 @@ def todo_item_new_from_id(todolist_id, from_id):
     todo_from = Todo.query.get(from_id)
     form = TodoEditForm(tags=todo_from.tags if todo_from else "")
     if form.validate_on_submit():
-        tags_list = [x.strip() for x in form.tags.data.split()]
+        tags_list = tags_list_normalizer(form.tags.data)
         tags = ' '.join(tags_list)
         ## check if tags are right
         tags_set = set(tags_list)
         # print(tags,tags_set)
         for rec in l_todolist.todos_all:
             rs_tag = set(rec.tags.split())
-            # print(rs_tag, tags_set, rs_tag == tags_set)
             if rs_tag == tags_set:
                 tags = rec.tags
-                # print('found')
                 break
 
         todo = Todo(
-            description=form.description.data.strip(),
+            description=remove_single_p_tag(form.description.data.strip()),
             todolist_id=todolist_id,
             creator=_get_username(),
             tags=tags,

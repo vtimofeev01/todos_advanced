@@ -101,6 +101,18 @@ pattern_url = re.compile(
 
 pattern_mail = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
 
+find_tags = re.compile('<[^\/]*>[^\<\>\/]*<\/[^\/\<\>]*>')
+find_p_tag = re.compile('<p>')
+tag_p_both = re.compile('<\/?p>')
+
+def cleanhtml(raw_html):
+  cleantext = re.sub(tag_p_both, '', raw_html)
+  return cleantext
+def remove_single_p_tag(s: str):
+    if len(tag_p_both.findall(s)) == 2:
+        return cleanhtml(s)
+    return s
+
 
 def capitalize(s: str) -> str:
     return s[0].upper() + s[1:].lower()
@@ -140,13 +152,14 @@ def text_parse(s: str) -> str:
 
 def msg_parse(s: str):
     out = dict()
-    # print(f'[PARSE] <{s}>')
     t_goal = G_REGEX_DO.findall(s)
-    # print(f'[PARSE] <{t_goal}>')
     if len(t_goal):
         mo = G_HMS.match(t_goal[0])
         out['goal'] = date(int(mo.group('Y')), int(mo.group('M')), int(mo.group('D')))
     return out
+
+def tags_list_normalizer(s: str):
+    return [x.strip() for x in s.split()]
 
 
 if __name__ == "__main__":
