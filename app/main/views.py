@@ -83,8 +83,13 @@ def todolist(todolist_id):
             filter_reader.append("+" + session[hk])
     filter_header = ', '.join(filter_reader) if filter_reader else None
 
+    tg_l, tg_a = l_todolist.get_tags_to_filter_for(current_user.b_show_all,
+                                                               session.get(S_TAG,None),
+                                                               session.get(S_ASSIGNED,None),
+                                                               )
+
     return render_template("todolist.html", todolist=l_todolist, todolist_details=todolist_details,
-                           filter_header=filter_header)
+                           filter_header=filter_header, tg_l=tg_l, tg_a=tg_a)
 
 
 @main.route("/todolist/add/", methods=["POST"])
@@ -144,11 +149,12 @@ def todo_item(todolist_id, todo_id):
             rs_tag = set(rec.tags.split())
             # print(rs_tag, tags_set, rs_tag == tags_set)
             if rs_tag == tags_set:
-                todo.tags = rec.tags
+                # tags = rec.tags
+                tags = ' '.join([x.strip() for x in rec.tags.split()])
                 # print('found')
                 break
 
-
+        todo.tags = tags
 
         if todo.is_finished and todo.finished_at is None:
             todo.finished_at = datetime.utcnow()

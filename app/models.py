@@ -227,6 +227,52 @@ class TodoList(db.Model):
         return [(capitalize(a), dict_of_first_tags[a]) for a in sorted(dict_of_first_tags.keys())], \
             [(capitalize(a), dict_of_tags[a]) for a in sorted(dict_of_tags.keys())]
 
+
+
+    def get_tags_to_filter_for(self, show_all, tag=None, assigned=None):
+        tags_first_dict = {}
+        tags_others_dict = {}
+        tags_assigned = {}
+        # print(f"[get_tags_to_filter_for] = tag:{tag} assigned:{assigned}")
+        tag2 = tag.lower().strip() if tag else None
+        ass2 = assigned.lower().strip() if assigned else None
+        for todo in self.todos_list(show_all):
+            t_list = [x.lower().strip() for x in todo.tags.split()]
+            present = 1 if tag2 is not None and tag2 in t_list else 0
+            t_assigned = [x.lower().strip() for x in todo.assigned.split(',')]
+            # print(todo.id, '---------------------')
+            # print(t_list, t_assigned)
+            present += 1 if ass2 is not None and ass2 in t_assigned else 0
+
+            if t_list[0] not in tags_first_dict:
+                tags_first_dict[t_list[0]] = present
+            tags_first_dict[t_list[0]] += present
+            if len(t_list) > 1:
+                for t_tag in t_list[1:]:
+                    if t_tag not in tags_others_dict:
+                        tags_others_dict[t_tag] = present
+                    tags_others_dict[t_tag] += present
+
+            for assigned in t_assigned:
+                if assigned not in tags_assigned:
+                    tags_assigned[assigned] = present
+                tags_assigned[assigned] += present
+
+            # print(tags_first_dict)
+            # print(tags_others_dict)
+            # print(tags_assigned)
+
+        return [[(capitalize(a), capitalize(a), tags_first_dict[a]) for a in sorted(tags_first_dict.keys())],
+            [(capitalize(a), capitalize(a), tags_others_dict[a]) for a in sorted(tags_others_dict.keys())] + [('All', 'None', 1)]], \
+            [(capitalize(a), capitalize(a), tags_assigned[a]) for a in sorted(tags_assigned.keys())] + [('All', 'None', 1)],
+
+
+
+
+
+
+
+
     def get_used_tags(self, show_all):
         l1, l2 = self.get_used_tags_row(show_all)
         return l1 + l2
