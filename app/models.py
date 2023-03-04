@@ -166,13 +166,11 @@ class TodoList(db.Model):
     def open_count(self):
         return self.todos.filter_by(is_finished=False).count()
 
-    @property
-    def todos_actual(self):
+    def todos_actual(self, sort_type):
         now = datetime.utcnow()
         now_l_mid = now - MID_INTERVAL
         now_l_near = now - NEAR_INTERVAL
-
-        return self.todos.filter(
+        selection =  self.todos.filter(
             or_(
                 or_(
                     and_(Todo.goal_at is None, Todo.created_at > now_l_mid),
@@ -180,22 +178,30 @@ class TodoList(db.Model):
                 ),
                 and_(Todo.is_finished, Todo.finished_at > now_l_near)
             )
-        ).order_by(Todo.tags, Todo.id)
+        )
+        print(f'todos_actual sort:{sort_type}')
 
-    @property
-    def todos_all(self):
+        if sort_type == 'by_date':
+            return selection.order_by(Todo.tags, Todo.goal_at)
+        return selection.order_by(Todo.tags, Todo.id)
+
+
+    def todos_all(self, sort_type):
+        if sort_type == 'by_date':
+            return self.todos.order_by(Todo.tags, Todo.goal_at)
         return self.todos.order_by(Todo.tags, Todo.id)
 
-    def todos_list(self, v):
+    def todos_list(self, v, sort_type):
+        print(f'sort_type={sort_type}')
         if v:
-            return self.todos_all
+            return self.todos_all(sort_type)
         else:
-            return self.todos_actual
+            return self.todos_actual(sort_type)
 
     def get_used_tags_row(self, show_all):
         set_of_tags = set()
         set_of_first_tags = set()
-        for todo in self.todos_all if show_all else self.todos_actual:
+        for todo in self.todos_all('') if show_all else self.todos_actual(''):
             if not todo.tags:
                 continue
             t_list = todo.tags.split()
@@ -209,7 +215,7 @@ class TodoList(db.Model):
         dict_of_tags = {}
         dict_of_first_tags = {}
         tag2 = tag.lower().strip() if tag else None
-        for todo in self.todos_list(show_all):
+        for todo in self.todos_list(show_all, ''):
             if not todo.tags:
                 continue
             t_list = [x.lower().strip() for x in todo.tags.split()]
@@ -236,7 +242,7 @@ class TodoList(db.Model):
         # print(f"[get_tags_to_filter_for] = tag:{tag} assigned:{assigned}")
         tag2 = tag.lower().strip() if tag else None
         ass2 = assigned.lower().strip() if assigned else None
-        for todo in self.todos_list(show_all):
+        for todo in self.todos_list(show_all, ''):
             t_list = [x.lower().strip() for x in todo.tags.split()]
             present = 1 if tag2 is not None and tag2 in t_list else 0
             t_assigned = [x.lower().strip() for x in todo.assigned.split(',')]
@@ -290,14 +296,14 @@ class TodoList(db.Model):
     # @property
     def get_assigned_to_list(self, show_all):
         set_of_assigned = set()
-        for todo in self.todos_list(show_all):
+        for todo in self.todos_list(show_all, ''):
             set_of_assigned.update(todo.assigned.split(','))
         return sorted(list(set(capitalize(x.strip()) for x in set_of_assigned)))
 
     def get_assigned_to_list_advanced(self, show_all, tag=None):
         dict_of_assigned = {}
         tag2 = tag.lower().strip() if tag else None
-        for todo in self.todos_list(show_all):
+        for todo in self.todos_list(show_all, ''):
             present = 0 if tag2 is None or tag2 not in todo.tags.lower() else 1
             for assigned in todo.assigned.split(','):
                 assigned2 = assigned.lower().strip()

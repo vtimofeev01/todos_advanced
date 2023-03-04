@@ -1,5 +1,6 @@
 import random
 from datetime import datetime
+from enum import Enum
 
 from flask import redirect, render_template, request, url_for, session
 from flask_login import current_user, login_required
@@ -16,6 +17,11 @@ S_TAG = 'tag'
 S_ASSIGNED = 'assigned_to'
 S_LAST_EDIT = 'last_edited'
 S_SORT_ORDER = 'sort_order'
+C_ORDER = ('by_id', 'by_date')
+L_C_ORDER = len(C_ORDER)
+D_C_ORDER = 1
+S_TODOLIST_ID = 'todolist_id'
+S_ANCHOR = 'anchor'
 
 @main.route("/")
 def index():
@@ -41,7 +47,7 @@ def _get_username():
 def todolist(todolist_id):
     args = request.args
     l_todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
-    todolist_details = l_todolist.todos_list(current_user.b_show_all)
+    todolist_details = l_todolist.todos_list(current_user.b_show_all, C_ORDER[session.get(S_SORT_ORDER, D_C_ORDER) % L_C_ORDER])
 
     if S_TODOLIST not in session:
         session[S_TODOLIST] = todolist_id
@@ -90,9 +96,10 @@ def todolist(todolist_id):
                                                                session.get(S_TAG,None),
                                                                session.get(S_ASSIGNED,None),
                                                                )
+    session[S_TODOLIST] = todolist_id
 
     return render_template("todolist.html", todolist=l_todolist, todolist_details=todolist_details,
-                           filter_header=filter_header, tg_l=tg_l, tg_a=tg_a)
+                           filter_header=filter_header, tg_l=tg_l, tg_a=tg_a, C_ORDER=C_ORDER)
 
 
 @main.route("/todolist/add/", methods=["POST"])
@@ -124,8 +131,8 @@ def set_todo_done(todolist_id, todo_id):
     todo.finished_at = datetime.utcnow() if todo.is_finished else None
     db.session.add(todo)
     db.session.commit()
-    # todo.save()
-    return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=todo.tags))
+    session[S_ANCHOR] = todo.tags
+    return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=session.get(S_ANCHOR, '')))
 
 
 @main.route("/todo_item/<int:todolist_id>/<int:todo_id>/", methods=["GET", "POST"])
@@ -147,7 +154,7 @@ def todo_item(todolist_id, todo_id):
         ## check if tags are right
         tags_set = set(tags_list)
         # print(tags,tags_set)
-        for rec in l_todolist.todos_all:
+        for rec in l_todolist.todos_all(''):
             rs_tag = set(rec.tags.split())
             # print(rs_tag, tags_set, rs_tag == tags_set)
             if rs_tag == tags_set:
@@ -170,8 +177,10 @@ def todo_item(todolist_id, todo_id):
         else:
             db.session.commit()
         session[S_LAST_EDIT] = todo.id
-        return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=todo.tags))
-    return render_template("todo_item.html", form=form, todo_id=todo_id, todolist_id=todolist_id, todolist=l_todolist)
+        session[S_ANCHOR] = todo.tags
+        return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=session.get(S_ANCHOR,'')))
+    return render_template("todo_item.html", form=form, todo_id=todo_id, todolist_id=todolist_id, todolist=l_todolist,
+                           C_ORDER=C_ORDER)
 
 
 @main.route("/todo_item/<int:todolist_id>/new_from<int:from_id>", methods=["GET", "POST"])
@@ -187,7 +196,7 @@ def todo_item_new_from_id(todolist_id, from_id):
         ## check if tags are right
         tags_set = set(tags_list)
         # print(tags,tags_set)
-        for rec in l_todolist.todos_all:
+        for rec in l_todolist.todos_all(''):
             rs_tag = set(rec.tags.split())
             if rs_tag == tags_set:
                 tags = rec.tags
@@ -202,5 +211,16 @@ def todo_item_new_from_id(todolist_id, from_id):
         db.session.add(todo)
         db.session.commit()
         session[S_LAST_EDIT] = todo.id
-        return redirect(url_for("main.todolist", todolist_id=todolist_id,  _anchor=tags))
-    return render_template("todo_item.html", form=form, todolist_id=todolist_id, todolist=l_todolist)
+        session[S_ANCHOR] = tags
+        return redirect(url_for("main.todolist", todolist_id=todolist_id,  _anchor=session.get(S_ANCHOR, '')))
+    return render_template("todo_item.html", form=form, todolist_id=todolist_id, todolist=l_todolist, C_ORDER=C_ORDER)
+
+
+@main.route("/change_sort_order", methods=["GET","POST"])
+@login_required
+def change_sort_order():
+    if session.get(S_SORT_ORDER, None) is None:
+        session[S_SORT_ORDER] = D_C_ORDER
+    else:
+        session[S_SORT_ORDER] += 1
+    return redirect(url_for("main.todolist", todolist_id=session[S_TODOLIST], _anchor=session.get(S_ANCHOR,'')))
