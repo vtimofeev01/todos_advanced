@@ -14,6 +14,9 @@ from app.parse_text import msg_mark, tags_list_normalizer, remove_single_p_tag
 S_TODOLIST = 'todolist'
 S_TAG = 'tag'
 S_ASSIGNED = 'assigned_to'
+S_LAST_EDIT = 'last_edited'
+S_SORT_ORDER = 'sort_order'
+
 @main.route("/")
 def index():
     # return render_template("index.html", form=form)
@@ -166,6 +169,7 @@ def todo_item(todolist_id, todo_id):
             db.session.commit()
         else:
             db.session.commit()
+        session[S_LAST_EDIT] = todo.id
         return redirect(url_for("main.todolist", todolist_id=todolist_id, _anchor=todo.tags))
     return render_template("todo_item.html", form=form, todo_id=todo_id, todolist_id=todolist_id, todolist=l_todolist)
 
@@ -197,5 +201,6 @@ def todo_item_new_from_id(todolist_id, from_id):
             assigned_to=form.assigned.data) # .save()
         db.session.add(todo)
         db.session.commit()
+        session[S_LAST_EDIT] = todo.id
         return redirect(url_for("main.todolist", todolist_id=todolist_id,  _anchor=tags))
     return render_template("todo_item.html", form=form, todolist_id=todolist_id, todolist=l_todolist)
