@@ -17,9 +17,9 @@ S_TAG = 'tag'
 S_ASSIGNED = 'assigned_to'
 S_LAST_EDIT = 'last_edited'
 S_SORT_ORDER = 'sort_order'
-C_ORDER = ('by_id', 'by_date')
+C_ORDER = ('by_date','by_id', )
 L_C_ORDER = len(C_ORDER)
-D_C_ORDER = 1
+# D_C_ORDER = 1
 S_TODOLIST_ID = 'todolist_id'
 S_ANCHOR = 'anchor'
 
@@ -47,7 +47,7 @@ def _get_username():
 def todolist(todolist_id):
     args = request.args
     l_todolist = TodoList.query.filter_by(id=todolist_id).first_or_404()
-    todolist_details = l_todolist.todos_list(current_user.b_show_all, C_ORDER[session.get(S_SORT_ORDER, D_C_ORDER) % L_C_ORDER])
+    todolist_details = l_todolist.todos_list(current_user.b_show_all, C_ORDER[session.get(S_SORT_ORDER, 0) % L_C_ORDER])
 
     if S_TODOLIST not in session:
         session[S_TODOLIST] = todolist_id
@@ -220,7 +220,7 @@ def todo_item_new_from_id(todolist_id, from_id):
 @login_required
 def change_sort_order():
     if session.get(S_SORT_ORDER, None) is None:
-        session[S_SORT_ORDER] = D_C_ORDER
+        session[S_SORT_ORDER] = 0
     else:
         session[S_SORT_ORDER] += 1
     return redirect(url_for("main.todolist", todolist_id=session[S_TODOLIST], _anchor=session.get(S_ANCHOR,'')))
